@@ -2,10 +2,16 @@ from nonebot import logger
 import requests
 from bs4 import BeautifulSoup
 
-headers = {
+headers_animegarden = {
         'User-Agent': 'Sakurako/1.0 (Windows 10; Win64; x64) Napcat/1.6.7 animegarden',
         'Accept': '*/*',
         'Host': 'api.animes.garden',
+        'Connection': 'close'
+    }
+
+headers_unpkg = {
+        'User-Agent': 'Sakurako/1.0 (Windows 10; Win64; x64) Napcat/1.6.7 animegarden',
+        'Accept': '*/*',
         'Connection': 'close'
     }
 
@@ -24,7 +30,7 @@ async def get_bangumi(keys: str, nums: int):
     logger.success(f"Result Url: {_url}")
 
     try:
-        response = requests.request("GET", _url, headers=headers)
+        response = requests.request("GET", _url, headers=headers_animegarden)
         # logger.success(response.headers)
         # logger.success(response.text)
         if response.status_code == 200:
@@ -48,3 +54,27 @@ async def get_bangumi(keys: str, nums: int):
         pass
         # TODO: email notice & qq notice
     return bangumi_items
+
+async def get_day_bangumi(day: int):
+    _url = "https://unpkg.com/bgmd/data/calendar.json"
+    result_list = []
+    
+    try:
+        response = requests.request("GET", _url, headers=headers_unpkg)
+        if response.status_code == 200:
+            data = response.json().get('calendar', [])
+            # print(data)
+            
+            for item in data[day-1]:
+                if item["bangumi"]["name_cn"]:
+                    result_list.append(item["bangumi"]["name_cn"])
+                else:
+                    result_list.append(item["name"])
+            
+        else:
+            print(f"请求失败，状态码: {response.status_code}")
+    except Exception as e:
+        logger.error("function get_day_bangumi() got an Unknown Expection", e)
+        pass
+        # TODO: email notice & qq notice
+    return result_list

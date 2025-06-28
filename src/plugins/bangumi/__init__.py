@@ -8,3 +8,4 @@ __plugin_meta__ = PluginMetadata(
 )
 
 from . import search as search
+from . import day as day
