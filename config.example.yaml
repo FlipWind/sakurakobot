@@ -1,5 +1,8 @@
 botid: 123456789 # 机器人 ID，用于转发消息节点
 botnickname: 樱子 # 机器人昵称
+version: 0.1.0 # 机器人版本号
+
+output_group: 123456789 # 输出测试消息的群组 ID，用于每 6 小时的存活提醒
 
 command_output: true # 是否输出测试消息
 

@@ -4,6 +4,7 @@ from nonebot import require
 import os
 import yaml
 import datetime
+import nonebot
 
 require("nonebot_plugin_alconna")
 from arclet.alconna import Alconna, Alconna, Args, Option, MultiVar
@@ -12,6 +13,8 @@ from nonebot_plugin_alconna import At, on_alconna, AlconnaMatch, Match, CommandM
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment
 from nonebot.adapters.onebot.v11.exception import ActionFailed
 
+require("nonebot_plugin_apscheduler")
+from nonebot_plugin_apscheduler import scheduler
 
 CONFIG_PATH = "config.yaml"
 _config: Dict[str, Any] = {}
@@ -27,6 +30,7 @@ def get_config():
 
     return _config
 
+VERSION = get_config().get("version", 0)
 
 BANNED_GROUPS = get_config().get("banned_groups", [])
 SUPPER_USERS = get_config().get("super_users", [])
@@ -34,6 +38,8 @@ BOTID = get_config().get("botid", 0)
 BOTNICKNAME = get_config().get("botnickname", "Bot")
 
 COMMAND_OUTPUT = get_config().get("command_output", False)
+
+OUTPUT_GROUP = get_config().get("output_group", 0)
 
 ### Struct
 
