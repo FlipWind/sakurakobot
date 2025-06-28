@@ -13,7 +13,7 @@ async def _(
         await bangumi_today.send(f"Handle [#bangumitoday] with day [{day.result}]")
 
     res = await get_day_bangumi(day.result)
-    append_list: List[Any] = [f"已知 周{" 一二三四五六日"[day.result]} 番剧如下喵！"] + res
+    append_list: List[Any] = [f"已知 周{' 一二三四五六日'[day.result]} 番剧如下喵！"] + res
 
     try:
         await bangumi_today.finish(ListToNode(append_list))
