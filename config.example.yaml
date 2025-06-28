@@ -1,0 +1,10 @@
+botid: 123456789 # 机器人 ID，用于转发消息节点
+botnickname: 樱子 # 机器人昵称
+
+command_output: true # 是否输出测试消息
+
+banned_groups: # 禁止使用机器人的群组列表
+  - 123456789
+
+super_users: # 能使用所有机器人功能的 user，等效为 QQ 管理员
+  - 123456789

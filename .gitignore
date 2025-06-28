@@ -1,0 +1,8 @@
+.venv
+NapCat.34231.Shell
+config.yaml
+
+/temp
+__pycache__/
+
+upload.py
