@@ -1,5 +1,7 @@
 from typing import Dict, Any, Optional, List
 from nonebot import logger, require, on_command, on_message
+from nonebot.exception import IgnoredException
+from nonebot.message import event_preprocessor
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from urllib.parse import urlparse
@@ -17,7 +19,7 @@ require("nonebot_plugin_alconna")
 from arclet.alconna import Alconna, Alconna, Args, Option, MultiVar
 from nonebot_plugin_alconna import At, on_alconna, AlconnaMatch, Match, CommandMeta
 
-from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment
+from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, Event
 from nonebot.adapters.onebot.v11.exception import ActionFailed
 
 require("nonebot_plugin_apscheduler")
