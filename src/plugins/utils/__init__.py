@@ -10,6 +10,7 @@ from arclet.alconna import Alconna, Alconna, Args, Option, MultiVar
 from nonebot_plugin_alconna import At, on_alconna, AlconnaMatch, Match, CommandMeta
 
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment
+from nonebot.adapters.onebot.v11.exception import ActionFailed
 
 
 CONFIG_PATH = "config.yaml"
