@@ -1,5 +1,5 @@
 from typing import Dict, Any, Optional, List
-from nonebot import logger, require, on_command, on_message
+from nonebot import logger, require, on_command, on_message, get_driver
 from nonebot.exception import IgnoredException
 from nonebot.message import event_preprocessor
 from io import BytesIO
