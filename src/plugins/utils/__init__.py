@@ -19,7 +19,7 @@ require("nonebot_plugin_alconna")
 from arclet.alconna import Alconna, Alconna, Args, Option, MultiVar
 from nonebot_plugin_alconna import At, on_alconna, AlconnaMatch, Match, CommandMeta
 
-from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, Event
+from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, Event, MessageEvent
 from nonebot.adapters.onebot.v11.exception import ActionFailed
 
 require("nonebot_plugin_apscheduler")
@@ -49,6 +49,8 @@ BOTNICKNAME = get_config().get("botnickname", "Bot")
 COMMAND_OUTPUT = get_config().get("command_output", False)
 
 OUTPUT_GROUP = get_config().get("output_group", 0)
+
+BOT = nonebot.get_bot()
 
 ### Struct
 
@@ -86,3 +88,25 @@ def ListToNode(list: List[str] | List[NodeMessage]) -> Message:
         )
 
     return messages
+
+async def send_node_messages(event: MessageEvent, messages: List[Any]):
+    """
+    Args:
+        event (Event): 事件对象
+        messages (List[NodeMessage]): 转发消息的列表
+    """
+    bot = BOT
+    
+    if not messages:
+        return
+    
+    await bot.send(event, message=ListToNode(messages))
+    
+    try:
+        await bot.send(event, message=ListToNode(messages))
+    except ActionFailed as e:
+        logger.error(f"Error in sending message: {e}")
+        logger.error(messages)
+        await bot.send(event, "发送转发消息失败，推测是可能该消息内含有屏蔽词喵~\n改为直接发送喵。")
+        
+        await bot.send(event, Message("\n".join(messages)))

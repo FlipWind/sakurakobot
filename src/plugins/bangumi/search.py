@@ -26,11 +26,4 @@ async def _(
         append_list.append(f"[{i+1}]. {res[i].type} - {res[i].title}\n大小 {round(res[i].size/1024, 2)} MB")
         append_list.append(f"{res[i].magnet}")
 
-    try:
-        await bangumi_search.finish(ListToNode(append_list))
-    except ActionFailed as e:
-        logger.error(f"Error in sending message: {e}")
-        logger.error(append_list)
-        await bangumi_search.send("发送转发消息失败，推测是可能该消息内含有屏蔽词喵~\n改为直接发送喵。")
-        
-        await bangumi_search.finish(Message("\n".join(append_list)))
+    await send_node_messages(event, append_list)
