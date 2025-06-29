@@ -15,17 +15,19 @@ prompt = """
 
 api_key = LLM_ALIYUN_APIKEY
 
-def cq_type(message: str) -> str:
-    # Use regex to find CQ codes like [CQ:image,...] or [CQ:video,...]
-    match = re.search(r'\[CQ:([^,]+)', message)
-    if not match:
-        return message
+CQ_PATTERN = re.compile(r'\[CQ:([^,\]]+)(?:[^\]]*)\]')
 
-    cq_type = match.group(1).strip()
-    if "表情" in message:
-        cq_type = "动画表情"
-        
-    return f"[{cq_type} Message]"
+def cq_type(message: str) -> str:
+    def replace_match(match):
+        cq_type = match.group(1).strip()
+        if cq_type == "face":
+            return "[表情]"
+        elif "表情" in match.group(0):
+            return "[动画表情]"
+        return f"[{cq_type} Message]"
+    
+    processed = CQ_PATTERN.sub(replace_match, message)
+    return processed
 
 async def summarize_chat(data: dict) -> str:
     messages = data.get("messages", [])
@@ -38,11 +40,13 @@ async def summarize_chat(data: dict) -> str:
         nickname = sender.get("nickname", "Unknown")
         user_id = sender.get("user_id", "Unknown")
         raw_message = message.get("raw_message", "")
+        print(raw_message)
         result.append(
-            f"USER {nickname} ON {formatted_time} SEND: {cq_type(raw_message)}, "
+            f"USER {nickname} ON {formatted_time} SEND: {cq_type(raw_message)},"
         )
 
     formatted_output = "\n".join(result)
+    print(formatted_output)
 
     from openai import AsyncOpenAI as OpenAI
 
