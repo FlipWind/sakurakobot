@@ -2,18 +2,21 @@ from typing import Dict, Any, Optional, List
 from nonebot import logger, require, on_command, on_message, get_driver
 from nonebot.exception import IgnoredException
 from nonebot.message import event_preprocessor
+from nonebot.typing import T_State
+
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from urllib.parse import urlparse
 import os
 import yaml
-import datetime
+import datetime, time
 import nonebot
 import httpx
 import json
 import textwrap
 import io
 import base64
+import json
 
 require("nonebot_plugin_alconna")
 from arclet.alconna import Alconna, Alconna, Args, Option, MultiVar
@@ -26,6 +29,7 @@ require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
 CONFIG_PATH = "config.yaml"
+sakurako_state: Dict[str, Any] = {}
 _config: Dict[str, Any] = {}
 
 def get_config():
@@ -47,13 +51,12 @@ BOTID = get_config().get("botid", 0)
 BOTNICKNAME = get_config().get("botnickname", "Bot")
 
 COMMAND_OUTPUT = get_config().get("command_output", False)
-
 OUTPUT_GROUP = get_config().get("output_group", 0)
 
-BOT = nonebot.get_bot()
+LLM_ALIYUN_APIKEY = get_config().get("llm", {}).get("aliyun-apikey", "")
+driver = get_driver()
 
 ### Struct
-
 
 class NodeMessage:
     def __init__(self, content: str, nickname: str, user_id: int):
@@ -64,6 +67,15 @@ class NodeMessage:
     def __self__(self):
         return f"NodeMessage(content={self.content}, nickname={self.nickname}, user_id={self.user_id})"
 
+### Bot Initialization
+
+@driver.on_bot_connect
+async def _():
+    global BOT
+    global sakurako_state
+    BOT = nonebot.get_bot()
+    
+    await BOT.send_group_msg(group_id=OUTPUT_GROUP, message="Sakurako Bot Started.")
 
 ### Functions
 
@@ -99,8 +111,6 @@ async def send_node_messages(event: MessageEvent, messages: List[Any]):
     
     if not messages:
         return
-    
-    await bot.send(event, message=ListToNode(messages))
     
     try:
         await bot.send(event, message=ListToNode(messages))

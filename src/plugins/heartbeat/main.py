@@ -18,8 +18,3 @@ Version {VERSION}
 
 Developed by FlipWind""")
     
-driver = get_driver()
-
-@driver.on_bot_connect
-async def _(bot: Bot):
-    await bot.send_group_msg(group_id=OUTPUT_GROUP, message="Sakurako Bot Started.")
