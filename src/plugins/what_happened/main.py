@@ -14,9 +14,9 @@ async def _(
     if COMMAND_OUTPUT:
         await whathappened.send(f"Handle [#发生了啥] with count [{count.result}]")
 
-    if count.result > 3000:
-        await whathappened.send("消息过多，已限制为 3000 条消息。")
-        count.result = 3000
+    if count.result > 1500:
+        await whathappened.send("消息过多，已限制为 1500 条消息。")
+        count.result = 1500
     if count.result < 100:
         await whathappened.send("消息过少，已调整为 100 条消息。")
         count.result = 100
@@ -42,7 +42,7 @@ async def _(
         )
 
     content = await chatapi.summarize_chat(p)
-    messages = ["下面是最近 500 条的总结喵。", content, "使用 Qwen3-turbo 总结。"]
+    messages = [f"下面是最近 {count.result} 条的总结喵。", content, "使用 Qwen3-turbo 总结。"]
     
     await send_node_messages(event, messages)
     sakurako_state[group_key]["whathappened"] = "done"

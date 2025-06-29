@@ -15,6 +15,18 @@ prompt = """
 
 api_key = LLM_ALIYUN_APIKEY
 
+def cq_type(message: str) -> str:
+    # Use regex to find CQ codes like [CQ:image,...] or [CQ:video,...]
+    match = re.search(r'\[CQ:([^,]+)', message)
+    if not match:
+        return message
+
+    cq_type = match.group(1).strip()
+    if "表情" in message:
+        cq_type = "动画表情"
+        
+    return f"[{cq_type} Message]"
+
 async def summarize_chat(data: dict) -> str:
     messages = data.get("messages", [])
     result = []
@@ -27,7 +39,7 @@ async def summarize_chat(data: dict) -> str:
         user_id = sender.get("user_id", "Unknown")
         raw_message = message.get("raw_message", "")
         result.append(
-            f"Name: {nickname}, time: {formatted_time}, Message: {raw_message}, "
+            f"USER {nickname} ON {formatted_time} SEND: {cq_type(raw_message)}, "
         )
 
     formatted_output = "\n".join(result)

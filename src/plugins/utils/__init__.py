@@ -18,6 +18,7 @@ import io
 import base64
 import json
 import pathlib
+import re
 
 require("nonebot_plugin_alconna")
 from arclet.alconna import Alconna, Alconna, Args, Option, MultiVar
