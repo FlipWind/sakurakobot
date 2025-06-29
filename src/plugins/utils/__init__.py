@@ -17,6 +17,7 @@ import textwrap
 import io
 import base64
 import json
+import pathlib
 
 require("nonebot_plugin_alconna")
 from arclet.alconna import Alconna, Alconna, Args, Option, MultiVar
@@ -55,6 +56,9 @@ OUTPUT_GROUP = get_config().get("output_group", 0)
 
 LLM_ALIYUN_APIKEY = get_config().get("llm", {}).get("aliyun-apikey", "")
 driver = get_driver()
+
+### Assets
+ASSETS_PATH = pathlib.Path(__file__).parent.parent.parent.parent / "assets"
 
 ### Struct
 
