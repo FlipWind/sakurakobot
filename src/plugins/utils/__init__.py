@@ -7,6 +7,7 @@ from nonebot.typing import T_State
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from urllib.parse import urlparse
+from fuzzywuzzy import fuzz
 import os
 import yaml
 import datetime, time
@@ -20,10 +21,11 @@ import json
 import pathlib
 import re
 import random
+import asyncio
 
 require("nonebot_plugin_alconna")
 from arclet.alconna import Alconna, Alconna, Args, Option, MultiVar
-from nonebot_plugin_alconna import At, on_alconna, AlconnaMatch, Match, CommandMeta, At
+from nonebot_plugin_alconna import At, on_alconna, AlconnaMatch, Match, CommandMeta, At, Query
 
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, Event, MessageEvent, GroupBanNoticeEvent, GroupRequestEvent
 from nonebot.adapters.onebot.v11.exception import ActionFailed
@@ -58,6 +60,11 @@ OUTPUT_GROUP = get_config().get("output_group", 0)
 
 LLM_ALIYUN_APIKEY = get_config().get("llm", {}).get("aliyun-apikey", "")
 driver = get_driver()
+
+PJSK_ZHDBLINK = get_config().get("pjsk_tool", {}).get("zh_db_link", "")
+PJSK_JADBLINK = get_config().get("pjsk_tool", {}).get("ja_db_link", "")
+PJSK_DIFFI_CNLINK = get_config().get("pjsk_tool", {}).get("diffi_cndb_link", "")
+PJSK_DIFFI_JPLINK = get_config().get("pjsk_tool", {}).get("diffi_jpdb_link", "")
 
 ### Assets
 ASSETS_PATH = pathlib.Path(__file__).parent.parent.parent.parent / "assets"
