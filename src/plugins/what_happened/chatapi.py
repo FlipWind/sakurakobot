@@ -40,13 +40,11 @@ async def summarize_chat(data: dict) -> str:
         nickname = sender.get("nickname", "Unknown")
         user_id = sender.get("user_id", "Unknown")
         raw_message = message.get("raw_message", "")
-        print(raw_message)
         result.append(
             f"USER {nickname} ON {formatted_time} SEND: {cq_type(raw_message)},"
         )
 
     formatted_output = "\n".join(result)
-    print(formatted_output)
 
     from openai import AsyncOpenAI as OpenAI
 

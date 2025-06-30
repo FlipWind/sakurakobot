@@ -1,5 +1,5 @@
 from typing import Dict, Any, Optional, List
-from nonebot import logger, require, on_command, on_message, get_driver
+from nonebot import logger, require, on_command, on_message, get_driver, on_notice
 from nonebot.exception import IgnoredException
 from nonebot.message import event_preprocessor
 from nonebot.typing import T_State
@@ -19,12 +19,13 @@ import base64
 import json
 import pathlib
 import re
+import random
 
 require("nonebot_plugin_alconna")
 from arclet.alconna import Alconna, Alconna, Args, Option, MultiVar
-from nonebot_plugin_alconna import At, on_alconna, AlconnaMatch, Match, CommandMeta
+from nonebot_plugin_alconna import At, on_alconna, AlconnaMatch, Match, CommandMeta, At
 
-from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, Event, MessageEvent
+from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, Event, MessageEvent, GroupBanNoticeEvent
 from nonebot.adapters.onebot.v11.exception import ActionFailed
 
 require("nonebot_plugin_apscheduler")
@@ -125,3 +126,6 @@ async def send_node_messages(event: MessageEvent, messages: List[Any]):
         await bot.send(event, "发送转发消息失败，推测是可能该消息内含有屏蔽词喵~\n改为直接发送喵。")
         
         await bot.send(event, Message("\n".join(messages)))
+
+def get_user_is_admin(event: GroupMessageEvent):
+    return event.sender.role != "member"
