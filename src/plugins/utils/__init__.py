@@ -1,5 +1,5 @@
 from typing import Dict, Any, Optional, List
-from nonebot import logger, require, on_command, on_message, get_driver, on_notice
+from nonebot import logger, require, on_command, on_message, get_driver, on_notice, on_request
 from nonebot.exception import IgnoredException
 from nonebot.message import event_preprocessor
 from nonebot.typing import T_State
@@ -25,7 +25,7 @@ require("nonebot_plugin_alconna")
 from arclet.alconna import Alconna, Alconna, Args, Option, MultiVar
 from nonebot_plugin_alconna import At, on_alconna, AlconnaMatch, Match, CommandMeta, At
 
-from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, Event, MessageEvent, GroupBanNoticeEvent
+from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, Event, MessageEvent, GroupBanNoticeEvent, GroupRequestEvent
 from nonebot.adapters.onebot.v11.exception import ActionFailed
 
 require("nonebot_plugin_apscheduler")
@@ -129,3 +129,7 @@ async def send_node_messages(event: MessageEvent, messages: List[Any]):
 
 def get_user_is_admin(event: GroupMessageEvent):
     return event.sender.role != "member"
+
+async def get_bot_is_admin(bot: Bot, group_id: int):
+    info = await bot.get_group_member_info(group_id = group_id, user_id = BOTID)
+    return info["role"] != "member"
