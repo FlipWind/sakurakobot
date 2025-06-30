@@ -7,3 +7,4 @@ __plugin_meta__ = PluginMetadata(
 )
 
 from . import ban as ban
+# from . import grouprequest as grouprequest
