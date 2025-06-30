@@ -1,13 +1,22 @@
-botid: 123456789 # 机器人 ID，用于转发消息节点
-botnickname: 樱子 # 机器人昵称
-version: 0.1.0 # 机器人版本号
+botid: 1234567890
+botnickname: 樱子
+version: 1.1.0
 
-output_group: 123456789 # 输出测试消息的群组 ID，用于每 6 小时的存活提醒
+output_group: 1234567890
+command_output: true
 
-command_output: true # 是否输出测试消息
+banned_groups:
+  - 1234567890
 
-banned_groups: # 禁止使用机器人的群组列表
-  - 123456789
+super_users:
+  - 1234567890
 
-super_users: # 能使用所有机器人功能的 user，等效为 QQ 管理员
-  - 123456789
+# API keys
+llm:
+  aliyun-apikey: sk-1234567890
+
+pjsk_tool:
+  zh_db_link: "http://a.b.c.d/zh-CN/music_titles.json"
+  ja_db_link: "https://a.b.c.d/ja/music_titles.json"
+  diffi_cndb_link: "https://a.b.c.d/musicDifficulties.json"
+  diffi_jpdb_link: "https://a.b.c.d/musicDifficulties.json"
