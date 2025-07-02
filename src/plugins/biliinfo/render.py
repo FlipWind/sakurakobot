@@ -109,7 +109,7 @@ async def get_video_info(bvid: str) -> VideoInfo:
         raise Exception("转码失败，请稍后再试。")
 
 def call_font(size: int) -> ImageFont.FreeTypeFont:
-    return ImageFont.truetype("./assets/bilinote/MiSans-Bold.ttf", size)
+    return ImageFont.truetype(f"{ASSETS_PATH}/fonts/MiSans-Bold.ttf", size)
 
 def format_number(num):
     if num >= 1_000_000_000:

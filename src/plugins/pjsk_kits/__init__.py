@@ -8,4 +8,4 @@ __plugin_meta__ = PluginMetadata(
 )
 
 from . import sheet as sheet
-from .sticker import sticker as sticker
+from . import stickers as stickers
