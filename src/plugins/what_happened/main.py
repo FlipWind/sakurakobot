@@ -42,7 +42,7 @@ async def _(
         )
 
     content = await chatapi.summarize_chat(p)
-    messages = [f"下面是最近 {count.result} 条的总结喵。", content, "使用 Qwen3-turbo 总结。"]
+    messages = [f"下面是最近 {count.result} 条的总结喵。", content, "使用 Qwen3-235b-a22b 总结。"]
     
     await send_node_messages(event, messages)
     sakurako_state[group_key]["whathappened"] = "done"
