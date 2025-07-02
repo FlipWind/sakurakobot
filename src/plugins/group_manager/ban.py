@@ -4,7 +4,9 @@ ban = on_alconna(
     Alconna(
         "#ban", Args["user", At], Args["time?", int, 0], meta=CommandMeta(compact=True)
     ),
+    aliases=("#kill", "/kill"),
 )
+
 
 @ban.handle()
 async def _(
@@ -35,57 +37,76 @@ async def _(
 
 ban_repeat = on_notice()
 
+
 @ban_repeat.handle()
 async def _(bot: Bot, event: GroupBanNoticeEvent):
     user_id = event.user_id
     from_id = event.operator_id
     banned_type = event.sub_type
     duartion_time = event.duration
-    
+
     hint_message_ban = [
-        Message([
-            MessageSegment.at(user_id),
-            MessageSegment.text(f" 被打入大牢 {duartion_time} 秒喵~\n呐呐，我说杂鱼，只有🌟😡才会被禁言叭~\n嘻嘻 /v\\"),
-        ]),
-        Message([
-            MessageSegment.at(user_id),
-            MessageSegment.text(" 似了喵。"),
-        ]),
-        Message([
-            MessageSegment.at(user_id),
-            MessageSegment.text("，你在吗？怎么不说句话喵？是不是不喜欢我喵？"),
-        ]),
-        Message([
-            MessageSegment.at(user_id),
-            MessageSegment.text("，你在哪喵？"),
-        ]),
-    ]
-    
-    hint_message_unban = [
-        Message([
-            MessageSegment.at(user_id),
-            MessageSegment.text(" 被 "),
-            MessageSegment.at(from_id),
-            MessageSegment.text(" 释放，还不赶紧给磕一个喵。"),
-        ]),
-        Message([
-            MessageSegment.at(user_id),
-            MessageSegment.text(" 终于被大赦了！"),
-        ]),
-        Message([
-            MessageSegment.at(user_id),
-            MessageSegment.text("，欢迎回来喵。"),
-        ]),
-        Message([
-            MessageSegment.at(user_id),
-            MessageSegment.text(" 终于重见光日了喵！"),
-        ]),
+        Message(
+            [
+                MessageSegment.at(user_id),
+                MessageSegment.text(
+                    f" 被打入大牢 {duartion_time} 秒喵~\n呐呐，我说杂鱼，只有🌟😡才会被禁言叭~\n嘻嘻 /v\\"
+                ),
+            ]
+        ),
+        Message(
+            [
+                MessageSegment.at(user_id),
+                MessageSegment.text(" 似了喵。"),
+            ]
+        ),
+        Message(
+            [
+                MessageSegment.at(user_id),
+                MessageSegment.text("，你在吗？怎么不说句话喵？是不是不喜欢我喵？"),
+            ]
+        ),
+        Message(
+            [
+                MessageSegment.at(user_id),
+                MessageSegment.text("，你在哪喵？"),
+            ]
+        ),
     ]
 
-    if(banned_type == "ban"):
+    hint_message_unban = [
+        Message(
+            [
+                MessageSegment.at(user_id),
+                MessageSegment.text(" 被 "),
+                MessageSegment.at(from_id),
+                MessageSegment.text(" 释放，还不赶紧给磕一个喵。"),
+            ]
+        ),
+        Message(
+            [
+                MessageSegment.at(user_id),
+                MessageSegment.text(" 终于被大赦了！"),
+            ]
+        ),
+        Message(
+            [
+                MessageSegment.at(user_id),
+                MessageSegment.text("，欢迎回来喵。"),
+            ]
+        ),
+        Message(
+            [
+                MessageSegment.at(user_id),
+                MessageSegment.text(" 终于重见光日了喵！"),
+            ]
+        ),
+    ]
+
+    if banned_type == "ban":
         message = random.choice(hint_message_ban)
         await ban_repeat.finish(message)
-        
-    elif(banned_type == "lift_ban"):
+
+    elif banned_type == "lift_ban":
         message = random.choice(hint_message_unban)
         await ban_repeat.finish(message)
