@@ -20,15 +20,28 @@ class Repeater:
         self.forward_groups = TELEGRAM_FORWARD_GROUPS
 
     async def start(self):
-        self.client = TelegramClient("anon", self.api_id, self.api_hash, proxy=self.proxy)
+        self.client = TelegramClient(
+            "anon",
+            self.api_id,
+            self.api_hash,
+            proxy=self.proxy,
+            retry_delay=5,
+            connection_retries=720,
+            timeout=10,
+            auto_reconnect=True,
+        )
 
-        try: 
-            await self.client.start(self.phone, self.password) # type: ignore
-            self.client.add_event_handler(self._message_handle, events.NewMessage(chats=self.repeat_groups))
+        try:
+            await self.client.start(phone=self.phone, password=self.password) # type: ignore
+            self.client.add_event_handler(
+                self._message_handle,
+                events.NewMessage(chats=self.repeat_groups)
+            )
+            logger.info("Telethon 客户端连接成功，正在监听消息...")
         except Exception as e:
             logger.error(f"Telethon 客户端连接失败: {e}")
             return
-        
+
         await self.client.run_until_disconnected() # type: ignore
     
     async def stop(self):
