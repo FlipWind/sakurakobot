@@ -66,6 +66,18 @@ PJSK_JADBLINK = get_config().get("pjsk_tool", {}).get("ja_db_link", "")
 PJSK_DIFFI_CNLINK = get_config().get("pjsk_tool", {}).get("diffi_cndb_link", "")
 PJSK_DIFFI_JPLINK = get_config().get("pjsk_tool", {}).get("diffi_jpdb_link", "")
 
+TELEGRAM_REPEATER_GROUPS = get_config().get("telegram", {}).get("repeater_groups", [])
+TELEGRAM_FORWARD_GROUPS = get_config().get("telegram", {}).get("forward_groups", [])
+TELEGRAM_APPID = get_config().get("telegram", {}).get("appid", "")
+TELEGRAM_APIHASH = get_config().get("telegram", {}).get("apihash", "")
+
+TELEGRAM_PROXY_TYPE = get_config().get("telegram", {}).get("proxy", {}).get("type", "HTTP")
+TELEGRAM_PROXY_ADDR = get_config().get("telegram", {}).get("proxy", {}).get("addr", "")
+TELEGRAM_PROXY_PORT = get_config().get("telegram", {}).get("proxy", {}).get("port", 7890)
+
+TELEGRAM_ACC_PHONE = get_config().get("telegram", {}).get("account", {}).get("phone", "")
+TELEGRAM_ACC_PASSWORD = get_config().get("telegram", {}).get("account", {}).get("password", "")
+
 ### Assets
 ASSETS_PATH = pathlib.Path(__file__).parent.parent.parent.parent / "assets"
 
