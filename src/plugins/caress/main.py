@@ -26,8 +26,14 @@ async def handle_caress(
 
     if event.reply:
         _target = event.reply.sender.nickname
+    
+    message = [
+        MessageSegment.reply(event.message_id)
+    ]
 
     if operate.available:
-        await caress_matcher.finish(f"{_operater} {_action} {_target} {operate.result}！")
+        message.append(MessageSegment.text(f"{_operater} {_action} {_target} {operate.result}！"))
     else:
-        await caress_matcher.finish(f"{_operater} {_action}了 {_target} 喵！")
+        message.append(MessageSegment.text(f"{_operater} {_action}了 {_target} 喵！"))
+    
+    await caress_matcher.finish(Message(message))
