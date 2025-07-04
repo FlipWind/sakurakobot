@@ -97,6 +97,9 @@ driver = get_driver()
 
 @driver.on_startup
 async def start_telegram_monitor():
+    if not TELEGRAM_REPEATER_ENABLE:
+        logger.info("Telegram 监控未启用，跳过启动")
+        return
     try:
         asyncio.create_task(telegram_monitor.start())
         logger.info("Telegram 监控任务已创建")
@@ -105,5 +108,7 @@ async def start_telegram_monitor():
 
 @driver.on_shutdown
 async def stop_telegram_monitor():
-    """在 Nonebot 关闭时停止监控"""
+    if not TELEGRAM_REPEATER_ENABLE:
+        return
+    
     await telegram_monitor.stop()

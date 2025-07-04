@@ -66,6 +66,7 @@ PJSK_JADBLINK = get_config().get("pjsk_tool", {}).get("ja_db_link", "")
 PJSK_DIFFI_CNLINK = get_config().get("pjsk_tool", {}).get("diffi_cndb_link", "")
 PJSK_DIFFI_JPLINK = get_config().get("pjsk_tool", {}).get("diffi_jpdb_link", "")
 
+TELEGRAM_REPEATER_ENABLE = get_config().get("telegram", {}).get("enable", False)
 TELEGRAM_REPEATER_GROUPS = get_config().get("telegram", {}).get("repeater_groups", [])
 TELEGRAM_FORWARD_GROUPS = get_config().get("telegram", {}).get("forward_groups", [])
 TELEGRAM_APPID = get_config().get("telegram", {}).get("appid", "")
