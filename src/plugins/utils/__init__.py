@@ -8,6 +8,8 @@ from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from urllib.parse import urlparse
 from fuzzywuzzy import fuzz
+from pilmoji import Pilmoji
+from enum import Enum
 import os
 import yaml
 import datetime, time
@@ -22,6 +24,7 @@ import pathlib
 import re
 import random
 import asyncio
+import requests
 
 require("nonebot_plugin_alconna")
 from arclet.alconna import Alconna, Alconna, Args, Option, MultiVar
