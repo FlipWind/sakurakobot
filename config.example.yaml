@@ -1,6 +1,6 @@
 botid: 1234567890
-botnickname: 樱子
-version: 1.1.0
+botnickname: "樱子"
+version: 1.3.0
 
 output_group: 1234567890
 command_output: true
@@ -13,10 +13,25 @@ super_users:
 
 # API keys
 llm:
-  aliyun-apikey: sk-1234567890
+  aliyun-apikey: sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 pjsk_tool:
-  zh_db_link: "http://a.b.c.d/zh-CN/music_titles.json"
-  ja_db_link: "https://a.b.c.d/ja/music_titles.json"
-  diffi_cndb_link: "https://a.b.c.d/musicDifficulties.json"
-  diffi_jpdb_link: "https://a.b.c.d/musicDifficulties.json"
+  zh_db_link: "http://example.com/zh-CN/music_titles.json"
+  ja_db_link: "https://example.com/ja/music_titles.json"
+  diffi_cndb_link: "https://example.com/musicDifficulties.json"
+  diffi_jpdb_link: "https://example.com/musicDifficulties.json"
+
+telegram:
+  enable: false
+  repeater_groups:
+  forward_groups:
+  appid: 12345678
+  apihash: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  proxy:
+    type: HTTP
+    addr: 127.0.0.1
+    port: 7890
+  
+  account:
+    phone: "+xxxxxxxxxxxxx"
+    password: "your_password"
