@@ -76,6 +76,12 @@ async def _(bot: Bot, event: GroupBanNoticeEvent):
                 MessageSegment.text("，你在哪喵？"),
             ]
         ),
+        Message(
+            [
+                MessageSegment.at(user_id),
+                MessageSegment.text(" 被口球塞起来惹♡"),
+            ]
+        ),
     ]
 
     hint_message_unban = [
@@ -103,6 +109,12 @@ async def _(bot: Bot, event: GroupBanNoticeEvent):
             [
                 MessageSegment.at(user_id),
                 MessageSegment.text(" 终于重见光日了喵！"),
+            ]
+        ),
+        Message(
+            [
+                MessageSegment.at(user_id),
+                MessageSegment.text(" 被摘下了口球喵。"),
             ]
         ),
     ]
