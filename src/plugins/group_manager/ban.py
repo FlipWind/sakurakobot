@@ -23,7 +23,7 @@ async def _(
         await ban.send(
             f"Handle [#ban] with target user [{banned_user}], time [{time.result}]s"
         )
-    
+
     if banned_user == None:
         await ban.finish("请指定要封禁的用户喵~")
 
@@ -39,8 +39,57 @@ async def _(
     )
 
 
-ban_repeat = on_notice()
+ban_self = on_alconna(
+    Alconna("/kill @s", Args["time?", int, 60], meta=CommandMeta(compact=True))
+)
 
+
+@ban_self.handle()
+async def _(
+    bot: Bot, event: GroupMessageEvent, time: Match[int] = AlconnaMatch("time")
+):
+    if COMMAND_OUTPUT:
+        await ban_self.send(f"Handle [/kill @s] with time [{time.result}]s")
+
+    if get_user_is_admin(event):
+        await ban_self.finish("额，请你自助。")
+
+    time.result = time.result
+
+    await bot.set_group_ban(
+        group_id=event.group_id,
+        user_id=event.user_id,
+        duration=int(time.result),
+    )
+
+
+ban_all = on_alconna(
+    Alconna("/kill @a", Args["time?", int, 60], meta=CommandMeta(compact=True))
+)
+
+@ban_all.handle()
+async def _(
+    bot: Bot, event: GroupMessageEvent, time: Match[int] = AlconnaMatch("time")
+):
+    if COMMAND_OUTPUT:
+        await ban_all.send(f"Handle [/kill @a] with enabled [{'true' if time.result != 0 else 'false'}]")
+
+    repeat_on_whole_banned = [
+        "？干什么（感叹号）",
+        "想干嘛！",
+        "？"
+    ]
+    
+    if not get_user_is_admin(event):
+        await ban_all.finish(random.choice(repeat_on_whole_banned))
+    
+    await bot.set_group_whole_ban(
+        group_id=event.group_id,
+        enable=True if time.result != 0 else False,
+    )
+
+
+ban_repeat = on_notice()
 
 @ban_repeat.handle()
 async def _(bot: Bot, event: GroupBanNoticeEvent):
@@ -120,9 +169,13 @@ async def _(bot: Bot, event: GroupBanNoticeEvent):
     ]
 
     if banned_type == "ban":
+        if not user_id:
+            await ban_repeat.finish("大家，果然都是杂鱼呢~")
         message = random.choice(hint_message_ban)
         await ban_repeat.finish(message)
 
     elif banned_type == "lift_ban":
+        if not user_id:
+            await ban_repeat.finish("大家好呀~ 欢迎回来！")
         message = random.choice(hint_message_unban)
         await ban_repeat.finish(message)
