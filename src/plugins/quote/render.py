@@ -138,3 +138,21 @@ async def rend_quote(quote_message: QuoteMessage) -> Image.Image:
     image.paste(text_image, (158 + 25, 104 + 28), text_image)
     
     return image
+
+async def rend_multiple_quotes(quote_messages: list[QuoteMessage]) -> Image.Image:
+    images = []
+    for quote_message in quote_messages:
+        image = await rend_quote(quote_message)
+        images.append(image)
+    
+    total_height = sum(image.height for image in images) - 28 * (len(images) - 1)
+    max_width = max(image.width for image in images)
+    
+    f_image = Image.new("RGBA", (max_width, total_height), (16, 17, 19))
+    
+    _y = 0
+    for image in images:
+        f_image.paste(image, (0, _y), image)
+        _y += image.height - 28
+    
+    return f_image
