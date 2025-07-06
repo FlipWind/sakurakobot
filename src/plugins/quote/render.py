@@ -39,6 +39,10 @@ async def rend_quote(quote_message: QuoteMessage) -> Image.Image:
         
         with Pilmoji(temp_img) as cal_pilmoji:
             for chars in texts:
+                if chars == "\n":
+                    lines.append(cur_line)
+                    cur_line = ""
+                    continue
                 test_line = cur_line + chars
                 text_width = cal_pilmoji.getsize(test_line, font=font, emoji_scale_factor=0.9)[0]
                 
