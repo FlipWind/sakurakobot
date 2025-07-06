@@ -7,18 +7,18 @@ class RankType(Enum):
     HEAD = "head", (52, 37, 6), (227, 140, 18)
 
 class QuoteMessage:
-    def __init__(self, nickname: str, rank: str, header: str, profile: str, message: Message, rank_type: RankType):
+    def __init__(self, nickname: str, rank: str, header: str, user_id: str, message: Message, rank_type: RankType):
         self.nickname = nickname
         self.rank = rank
         self.header = header
 
-        self.profile = profile
+        self.user_id = user_id
         self.message = message
         self.rank_bac = rank_type.value[1]
         self.rank_text = rank_type.value[2]
     
     def __str__(self):
-        return f"QuoteMessage(nickname={self.nickname}, rank={self.rank}, header={self.header}, profile={self.profile}, message={self.message})"
+        return f"QuoteMessage(nickname={self.nickname}, rank={self.rank}, header={self.header}, profile={self.user_id}, message={self.message})"
 
 async def rend_quote(quote_message: QuoteMessage) -> Image.Image:
     temp_img = Image.new("RGB", (1, 1))
@@ -89,8 +89,40 @@ async def rend_quote(quote_message: QuoteMessage) -> Image.Image:
     
     # Draw Profile
     async with httpx.AsyncClient() as client:
-        response = await client.get(quote_message.profile)
-    profile_image = Image.open(BytesIO(response.content)).resize((100, 100))
+        async def try_fetch_avatar():
+            urls = [
+                f"http://q2.qlogo.cn/headimg_dl?dst_uin={quote_message.user_id}&spec=640",
+                f"http://q1.qlogo.cn/g?b=qq&nk={quote_message.user_id}&s=640",
+                f"http://q.qlogo.cn/headimg_dl?spec=640&dst_uin={quote_message.user_id}"
+            ]
+            
+            tasks = [asyncio.create_task(client.get(url, timeout=5.0)) for url in urls]
+            try:
+                done, pending = await asyncio.wait_for(
+                    asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED),
+                    timeout=10.0
+                )
+                
+                for task in pending:
+                    task.cancel()
+                
+                for task in done:
+                    try:
+                        response = task.result()
+                        if response.status_code == 200:
+                            return response.content
+                    except:
+                        continue
+                
+            except asyncio.TimeoutError:
+                for task in tasks:
+                    if not task.done():
+                        task.cancel()
+            
+            return Image.new("RGBA", (100, 100), (255, 255, 255, 100)).tobytes()
+        response = await try_fetch_avatar()
+            
+    profile_image = Image.open(BytesIO(response)).resize((100, 100))
     
     mask = Image.new("L", (100, 100), 0)
     ImageDraw.Draw(mask).ellipse((0, 0, 100, 100), fill=255)
