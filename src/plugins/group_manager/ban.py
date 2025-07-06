@@ -2,7 +2,7 @@ from ..utils import *
 
 ban = on_alconna(
     Alconna(
-        "#ban", Args["user", At], Args["time?", int, 0], meta=CommandMeta(compact=True)
+        "#ban", Args["user?", At], Args["time?", int, 0], meta=CommandMeta(compact=True)
     ),
     aliases=("#kill", "/kill"),
 )
@@ -15,12 +15,16 @@ async def _(
     user: Match[At] = AlconnaMatch("user"),
     time: Match[int] = AlconnaMatch("time"),
 ):
+    banned_user = int(user.result.target) if user.available else None
+    if event.reply:
+        banned_user = event.reply.sender.user_id
+
     if COMMAND_OUTPUT:
         await ban.send(
-            f"Handle [#ban] with target user [{user.result.target}], time [{time.result}]s"
+            f"Handle [#ban] with target user [{banned_user}], time [{time.result}]s"
         )
-
-    if not user.available:
+    
+    if banned_user == None:
         await ban.finish("请指定要封禁的用户喵~")
 
     time.result = max(time.result, 0)
@@ -30,7 +34,7 @@ async def _(
 
     await bot.set_group_ban(
         group_id=event.group_id,
-        user_id=int(user.result.target),
+        user_id=banned_user,
         duration=int(time.result),
     )
 
