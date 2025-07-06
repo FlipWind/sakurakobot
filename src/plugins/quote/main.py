@@ -54,7 +54,7 @@ async def _(
             nickname=profile["card"] if profile["card"] else profile["nickname"],
             rank=f"LV{profile['level']}",
             header=header,
-            profile=f"http://q.qlogo.cn/headimg_dl?spec=640&dst_uin={message["user_id"]}",
+            profile=f"http://q.qlogo.cn/headimg_dl?spec=640&dst_uin={message['user_id']}",
             message=Message([
                 MessageSegment(msg["type"], msg["data"]) for msg in message["message"]
             ]),
