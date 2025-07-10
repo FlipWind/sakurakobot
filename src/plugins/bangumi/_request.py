@@ -1,6 +1,7 @@
 from nonebot import logger
 import requests
 from bs4 import BeautifulSoup
+import httpx
 
 headers_animegarden = {
         'User-Agent': 'Sakurako/1.0 (Windows 10; Win64; x64) Napcat/1.6.7 animegarden',
@@ -30,7 +31,8 @@ async def get_bangumi(keys: str, nums: int):
     logger.success(f"Result Url: {_url}")
 
     try:
-        response = requests.request("GET", _url, headers=headers_animegarden)
+        async with httpx.AsyncClient() as client:
+            response = await client.get(_url, headers=headers_animegarden)
         # logger.success(response.headers)
         # logger.success(response.text)
         if response.status_code == 200:
@@ -60,7 +62,8 @@ async def get_day_bangumi(day: int):
     result_list = []
     
     try:
-        response = requests.request("GET", _url, headers=headers_unpkg)
+        async with httpx.AsyncClient() as client:
+            response = await client.get(_url, headers=headers_unpkg)
         if response.status_code == 200:
             data = response.json().get('calendar', [])
             # print(data)
