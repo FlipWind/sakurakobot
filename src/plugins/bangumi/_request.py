@@ -63,7 +63,7 @@ async def get_day_bangumi(day: int):
     
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(_url, headers=headers_unpkg)
+            response = await client.get(_url, headers=headers_unpkg, follow_redirects=True)
         if response.status_code == 200:
             data = response.json().get('calendar', [])
             # print(data)
