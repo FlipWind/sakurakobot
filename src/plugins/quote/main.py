@@ -1,8 +1,9 @@
 from ..utils import *
-from .render import rend_multiple_quotes, QuoteMessage, RankType
+from .render import rend_quote_message, rend_quote_messages, QuoteMessage
 
-quote = on_alconna(Alconna("#qt", Args["nums?", int, 1], meta=CommandMeta(compact=True)))
-
+quote = on_alconna(
+    Alconna("#qt", Args["nums?", int, 1], meta=CommandMeta(compact=True))
+)
 
 @quote.handle()
 async def _(
@@ -30,17 +31,17 @@ async def _(
             group_id=event.group_id, user_id=message["user_id"]
         )
 
-        rank_type = RankType.NORMAL
+        rank_type = QuoteMessage.RankType.NORMAL
         if profile["role"] == "owner":
-            rank_type = RankType.HEAD
+            rank_type = QuoteMessage.RankType.OWNER
         elif profile["role"] == "admin":
-            rank_type = RankType.ADMIN
+            rank_type = QuoteMessage.RankType.ADMIN
         else:
-            rank_type = RankType.NORMAL
+            rank_type = QuoteMessage.RankType.NORMAL
 
         header = profile["title"]
-        if rank_type == RankType.NORMAL and header:
-            rank_type = RankType.SPECIAL
+        if rank_type == QuoteMessage.RankType.NORMAL and header:
+            rank_type = QuoteMessage.RankType.SPECIAL
 
         if not header:
             if profile["role"] == "owner":
@@ -51,19 +52,20 @@ async def _(
                 header = "成员"
 
         quote_message = QuoteMessage(
-            nickname=profile["card"] if profile["card"] else profile["nickname"],
-            rank=f"LV{profile['level']}",
+            nick_name=profile["card"] if profile["card"] else profile["nickname"],
+            rank=int(profile['level']),
             header=header,
             user_id=message['user_id'],
             message=Message([
                 MessageSegment(msg["type"], msg["data"]) for msg in message["message"]
             ]),
             rank_type=rank_type,
+            group_id=event.group_id,
         )
         
         quote_messages.append(quote_message)
 
-    quote_image = await rend_multiple_quotes(quote_messages)
+    quote_image = await rend_quote_messages(quote_messages, bot)
     image_data = io.BytesIO()
     quote_image.save(image_data, format="PNG")
     image_data_bytes = image_data.getvalue()

@@ -1,190 +1,382 @@
 from ..utils import *
 
-class RankType(Enum):
-    NORMAL = "normal", (65, 65, 65), (181, 182, 181)
-    SPECIAL = "special", (66, 40, 90), (222, 121, 230)
-    ADMIN = "admin", (4, 50, 47), (24, 172, 156)
-    HEAD = "head", (52, 37, 6), (227, 140, 18)
-
 class QuoteMessage:
-    def __init__(self, nickname: str, rank: str, header: str, user_id: str, message: Message, rank_type: RankType):
-        self.nickname = nickname
+    class RankType(Enum):
+        # Name, Background Color, Text Color
+        NORMAL = "成员", (227, 227, 227), (186, 186, 186)
+        ADMIN = "管理员", (0, 50, 50), (20, 190, 160)
+        OWNER = "群主", (50, 40, 10), (230, 140, 20)
+        SPECIAL = "SPECIAL", (70, 40, 90), (210, 140, 230)
+
+    user_id: int
+    group_id: int
+    nick_name: str
+
+    rank_type: RankType
+    rank: int
+    header: str
+
+    message: Message
+
+    def __init__(
+        self,
+        user_id: int,
+        nick_name: str,
+        rank: int,
+        header: str,
+        message: Message,
+        rank_type: RankType,
+        group_id: int,
+    ):
+        self.user_id = user_id
+        self.nick_name = nick_name
         self.rank = rank
         self.header = header
-
-        self.user_id = user_id
         self.message = message
-        self.rank_bac = rank_type.value[1]
-        self.rank_text = rank_type.value[2]
-    
-    def __str__(self):
-        return f"QuoteMessage(nickname={self.nickname}, rank={self.rank}, header={self.header}, profile={self.user_id}, message={self.message})"
+        self.rank_type = rank_type
+        self.group_id = group_id
 
-async def rend_quote(quote_message: QuoteMessage) -> Image.Image:
-    temp_img = Image.new("RGB", (1, 1))
-    
-    # Font
-    def _font(name: str, size: int):
+    def get_message_seg(self) -> List[MessageSegment]:
+        list = []
+        for segment in self.message:
+            list.append(MessageSegment(segment.type, segment.data))
+        return list
+
+
+async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Image:
+    """Only rend a single quote message.
+    To rend multiple quote messages, use `rend_multiple_quote_messages()`.
+    Args:
+        quote_message (QuoteMessage): The quote message to rend.
+    Returns:
+        Image.Image: The rendered image of the quote message.
+    """
+    image_background = (16, 17, 18)
+    image_width = 940
+
+    async def _font(name: str, size: int) -> ImageFont.FreeTypeFont:
         return ImageFont.truetype(f"{ASSETS_PATH}/fonts/{name}.ttf", size)
-    
-    # Message
-    async def _draw_texts(texts: str) -> tuple[Image.Image, bool]:
-        font = _font("MiSans-Medium", 40)
-        if texts == "":
-            texts = " "
-        
-        lines = []
-        cur_line = ""
-        _length = 631
-        
-        with Pilmoji(temp_img) as cal_pilmoji:
-            for chars in texts:
-                if chars == "\n":
-                    lines.append(cur_line)
-                    cur_line = ""
+
+    # Rend the message
+    async def rend_image(urls: List[str]) -> Image.Image:
+        """Rend the image from online resource.
+        The default width is the width of message.
+        Under this ratio, it is defined as 690px.
+        Args:
+            url (List[str]): a list of URLs.
+                What you should know is that when url is a list, it will only return the first image.
+                Would like to rend multiple images? use `rend_images()` instead.
+        Returns:
+            Image.Image: The rendered image.
+        """
+        image_width = 690
+
+        async with httpx.AsyncClient() as client:
+            tasks = [asyncio.create_task(client.get(u)) for u in urls]
+            for task in asyncio.as_completed(tasks):
+                try:
+                    response = await task
+                    if response.status_code == 200:
+                        for t in tasks:
+                            if not t.done():
+                                t.cancel()
+
+                        image_data = BytesIO(response.content)
+                        image = Image.open(image_data)
+
+                        new_height = int(image.height * image_width / image.width)
+                        image = image.resize(
+                            (image_width, new_height), Image.Resampling.LANCZOS
+                        )
+
+                        return image
+                except Exception:
                     continue
-                test_line = cur_line + chars
-                text_width = cal_pilmoji.getsize(test_line, font=font, emoji_scale_factor=0.9)[0]
-                
-                if text_width <= 631:
-                    cur_line = test_line
+
+        # a placeholder
+        return Image.new("RGB", (690, 100), (50, 50, 50))
+
+    # Rend the at message
+    async def rend_text_message(
+        text: str, font=await _font("MiSans-Medium", 46), color=(255, 255, 255)
+    ) -> Image.Image:
+        """Rend the text message.
+        The default width is the width of message.
+        Under this ratio, it is defined as 690px.
+        Args:
+            text (str): The text to rend.
+        Returns:
+            Image.Image: The rendered image.
+        """
+        image_width = 690
+        line_height = 61
+
+        # temp_img = Image.new("RGB", (1, 1))
+        # with Pilmoji(temp_img) as pilmoji:
+        #     font = _font("MiSans-Medium", font_size)
+        #     text_image = pilmoji.text(text, font=font, fill=(255, 255, 255), width=image_width)
+
+        if text.endswith('\n'):
+            text = text[:-1]
+        sentences = text.split("\n")
+        lines = []
+        current_line = ""
+        
+        # handle text into lines
+        for sentence in sentences:
+            if sentence.endswith(" "):
+                sentence = sentence[:-1]
+            words = sentence.split(" ")
+            for word in words:
+                pilmoji = Pilmoji(Image.new("RGB", (1, 1)))
+                if current_line == "":
+                    # the line is empty, so rend char by char
+                    for char in word:
+                        line_width = pilmoji.getsize(
+                            current_line, font=font, emoji_scale_factor=0.9
+                        )[0]
+                        char_width = pilmoji.getsize(
+                            char, font=font, emoji_scale_factor=0.9
+                        )[0]
+                        if line_width + char_width > image_width:
+                            lines.append(current_line)
+                            current_line = char
+                        else:
+                            current_line += char
+                    line_width = pilmoji.getsize(
+                        current_line + " ", font=font, emoji_scale_factor=0.9
+                    )[0]
+                    if line_width >= image_width:
+                        lines.append(current_line)
+                        current_line = ""
+                    else:
+                        current_line += " "
                 else:
-                    lines.append(cur_line)
-                    cur_line = "" + chars
-            if cur_line:
-                lines.append(cur_line)
-            
-            if len(lines) == 1:
-                _length = cal_pilmoji.getsize(lines[0], font=font, emoji_scale_factor=0.9)[0]
+                    # the line not empty, try to add the word
+                    line_width = pilmoji.getsize(
+                        current_line + word, font=font, emoji_scale_factor=0.9
+                    )[0]
+
+                    if line_width > image_width:
+                        # line too long, jump to the next line
+                        lines.append(current_line)
+                        current_line = ""
+                        if (
+                            pilmoji.getsize(word, font=font, emoji_scale_factor=0.9)[0]
+                            >= image_width
+                        ):
+                            # the word is too big to go inside, rend char by char
+
+                            ### same as above
+                            for char in word:
+                                line_width = pilmoji.getsize(
+                                    current_line, font=font, emoji_scale_factor=0.9
+                                )[0]
+                                char_width = pilmoji.getsize(
+                                    char, font=font, emoji_scale_factor=0.9
+                                )[0]
+                                if line_width + char_width > image_width:
+                                    lines.append(current_line)
+                                    current_line = char
+                                else:
+                                    current_line += char
+                            line_width = pilmoji.getsize(
+                                current_line + " ", font=font, emoji_scale_factor=0.9
+                            )[0]
+                            if line_width >= image_width:
+                                lines.append(current_line)
+                                current_line = ""
+                            else:
+                                current_line += " "
+                            ### end
+
+                        else:
+                            current_line = word + " "
+                    else:
+                        current_line += word + " "
+            if current_line:
+                lines.append(current_line)
+                current_line = ""
+        if current_line != "":
+            lines.append(current_line)
         
-        # Draw each line
-        line_height = 48
+        image_width = 0
+        for line in lines:
+            with Pilmoji(Image.new("RGB", (1, 1))) as pilmoji:
+                image_width = max(image_width, pilmoji.getsize(
+                    line[:-1], font=font, emoji_scale_factor=0.9
+                )[0])
+
+        # rend the lines
+        text_image_height = len(lines) * line_height
+        text_image = Image.new(
+            "RGBA", (image_width, text_image_height), (255, 255, 255, 0)
+        )
         
-        text_image = Image.new("RGBA", (_length, len(lines) * line_height + 8), (255, 255, 255, 0))
         for i, line in enumerate(lines):
             with Pilmoji(text_image) as pilmoji:
-                pilmoji.text((0, i * line_height), line, fill=(255, 255, 255), font=font, emoji_scale_factor=0.9, emoji_position_offset=(0, 8))
+                pilmoji.text(
+                    (0, i * line_height),
+                    line,
+                    fill=color,
+                    font=font,
+                    emoji_scale_factor=0.9,
+                    emoji_position_offset=(0, 8),
+                )
 
-        return text_image, True if len(lines) == 1 else False
-    
-    # Calculate image size
-    title = f"{quote_message.rank} {quote_message.header}"
-    text_image, is_single_line = await _draw_texts(quote_message.message.extract_plain_text())
-    
-    height, width = 0, 900
-    if is_single_line:
-        with Pilmoji(temp_img) as cal_pilmoji:
-            title_width = cal_pilmoji.getsize(title, font=_font("MiSans-Semibold", 22), emoji_scale_factor=0.9)[0]
-            name_width = cal_pilmoji.getsize(quote_message.nickname, font=_font("MiSans-Medium", 28), emoji_scale_factor=0.9)[0]
-            title_edge = min(900, 158 + title_width + 16 + 12 + name_width + 36)
-            
-        with Pilmoji(temp_img) as cal_pilmoji:
-            text_edge = 158 + text_image.width + 50 + 36
+        return text_image
 
-        width = min(900, max(title_edge, text_edge))
-    
-    height = 104 + text_image.height + 28 + 28 + 36
-        
-    image = Image.new("RGBA", (width, height), (16, 17, 19))
-    
-    # Draw Profile
-    async with httpx.AsyncClient() as client:
-        async def try_fetch_avatar():
-            urls = [
-                f"http://q2.qlogo.cn/headimg_dl?dst_uin={quote_message.user_id}&spec=640",
-                f"http://q1.qlogo.cn/g?b=qq&nk={quote_message.user_id}&s=640",
-                f"http://q.qlogo.cn/headimg_dl?spec=640&dst_uin={quote_message.user_id}"
-            ]
-            
-            tasks = [asyncio.create_task(client.get(url, timeout=5.0)) for url in urls]
-            try:
-                done, pending = await asyncio.wait_for(
-                    asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED),
-                    timeout=10.0
+    # Calculate the height of the image
+    async def rend_content(quote_message: QuoteMessage):
+        image_height = 0
+
+        messages = quote_message.get_message_seg()
+        message_images = []
+        text_lists = ""
+        for message in messages:
+            if message.type == "image":
+                if text_lists != "":
+                    message_images.append(("text", await rend_text_message(text_lists)))
+                    text_lists = ""
+                image_message = await rend_image([message.data["url"]])
+                
+                mask = Image.new("L", image_message.size, 0)
+                ImageDraw.Draw(mask).rounded_rectangle(
+                    [(0, 0), image_message.size], radius=12, fill=255
+                )
+                image_message.putalpha(mask)
+                message_images.append(("image", image_message))
+                
+            if message.type == "text":
+                text_lists += message.data["text"]
+            if message.type == "at":
+                profile = await bot.get_group_member_info(
+                    group_id=quote_message.group_id,
+                    user_id=message.data["qq"],
                 )
                 
-                for task in pending:
-                    task.cancel()
-                
-                for task in done:
-                    try:
-                        response = task.result()
-                        if response.status_code == 200:
-                            return response.content
-                    except:
-                        continue
-                
-            except asyncio.TimeoutError:
-                for task in tasks:
-                    if not task.done():
-                        task.cancel()
-            
-            return Image.new("RGBA", (100, 100), (255, 255, 255, 100)).tobytes()
-        response = await try_fetch_avatar()
-            
-    profile_image = Image.open(BytesIO(response)).resize((100, 100))
-    
-    mask = Image.new("L", (100, 100), 0)
-    ImageDraw.Draw(mask).ellipse((0, 0, 100, 100), fill=255)
-    
-    profile_image.putalpha(mask)
-    image.paste(profile_image, (40, 40), profile_image)
-    
-    # Draw rank and header
-    draw = ImageDraw.Draw(image)
-    font_size = 22
-    
-    temp_img = Image.new("RGB", (1, 1))
-    with Pilmoji(temp_img) as temp_pilmoji:
-        text_width = temp_pilmoji.getsize(title, font=_font("MiSans-Semibold", font_size), emoji_scale_factor=0.9)[0]
-    
-    rect_width, rect_height = int(text_width + 20), 36
-    x, y = 157, 44
-    
-    draw.rounded_rectangle(
-        [(x, y), (x + rect_width, y + rect_height)],
-        radius=7,
-        fill=quote_message.rank_bac
-    )
-    
-    with Pilmoji(image) as pilmoji:
-        pilmoji.text((x + 10, y + 4), title, fill=quote_message.rank_text, font=_font("MiSans-Semibold", font_size), emoji_scale_factor=0.9, emoji_position_offset=(0, 5))
-    
-    # Draw nickname
-    nickname = quote_message.nickname
-    font_size = 28
-    with Pilmoji(image) as pilmoji:
-        pilmoji.text((x + rect_width + 16, 44), nickname, fill=(255, 255, 255), font=_font("MiSans-Medium", font_size))
-    
-    # Draw message
-    message_width = text_image.width
-    print(f"Message width: {message_width}")
-    message_height = text_image.height
-    
-    draw.rounded_rectangle(
-        [(158, 104), (158 + message_width + 50, 104 + message_height + 56)],
-        radius=26,
-        fill=(37, 38, 40)
-    )
-    
-    image.paste(text_image, (158 + 25, 104 + 28), text_image)
-    
-    return image
+                text_lists += f' @{profile["card"] if profile["card"] else profile["nickname"]}' # front with a space
 
-async def rend_multiple_quotes(quote_messages: list[QuoteMessage]) -> Image.Image:
-    images = []
-    for quote_message in quote_messages:
-        image = await rend_quote(quote_message)
-        images.append(image)
+        if text_lists != "":
+            message_images.append(("text", await rend_text_message(text_lists)))
+
+        for message_image in message_images:
+            image_height += message_image[1].height
+        image_height += (len(message_images) - 1) * 8
+        
+        content_image_width = 690
+        content_image_width = max(message_image[1].width for message_image in message_images)
+
+        content_image = Image.new("RGBA", (content_image_width, image_height), (255, 255, 255, 0))
+
+        _y = 0
+        for message_image in message_images:
+            content_image.paste(message_image[1], (0, _y))
+            _y += message_image[1].height + 8
+
+        return content_image
+
+    content_image = await rend_content(quote_message)
+    image_height = content_image.height + 94 + (24 + 37) + 25
+    # 94: from top to message_box
+    # 24 + 37: top padding + bottom padding
+    # 25: message_box to the bottom
+
+    quote_image = Image.new("RGB", (image_width, image_height), image_background)
+
+    # profile
+    profile_xy = (30, 22)
+    profile_image = await rend_image(
+        [
+            f"http://q2.qlogo.cn/headimg_dl?dst_uin={quote_message.user_id}&spec=640",
+            f"http://q1.qlogo.cn/g?b=qq&nk={quote_message.user_id}&s=640",
+            f"http://q.qlogo.cn/headimg_dl?spec=640&dst_uin={quote_message.user_id}",
+        ]
+    )
+    profile_image = profile_image.resize((110, 110), Image.Resampling.LANCZOS)
+
+    mask = Image.new("L", (110, 110), 0)
+    ImageDraw.Draw(mask).ellipse((0, 0, 110, 110), fill=255)
+    profile_image.putalpha(mask)
+
+    quote_image.paste(profile_image, profile_xy, profile_image)
+
+    # rank and header
+    rank_text_xy = (172, 29)
+    rank_header_xy = (160, 22)
+    rank_text = f"LV{quote_message.rank} {quote_message.header}"
+    # await rend_text_message(
+    #     rank_text,
+    #     font=await _font("MiSans-Semibold", 23),
+    #     color=quote_message.rank_type.value[2],
+    # )
     
-    total_height = sum(image.height for image in images) - 28 * (len(images) - 1)
-    max_width = max(image.width for image in images)
+    rank_text_width = 0
+    with Pilmoji(Image.new("RGB", (1, 1))) as pilmoji:
+        rank_text_width = pilmoji.getsize(
+            rank_text, font=await _font("MiSans-Semibold", 23), emoji_scale_factor=0.9
+        )[0]
     
-    f_image = Image.new("RGBA", (max_width, total_height), (16, 17, 19))
+    rank_header_xy_end = (160 + rank_text_width + 24, 22 + 23 + 24)
+
+    ImageDraw.Draw(quote_image).rounded_rectangle(
+        [rank_header_xy, rank_header_xy_end],
+        radius=12,
+        fill=quote_message.rank_type.value[1],
+    )
+
+    with Pilmoji(quote_image) as pilmoji:
+        pilmoji.text(
+            rank_text_xy,
+            rank_text,
+            fill=quote_message.rank_type.value[2],
+            font=await _font("MiSans-Semibold", 23),
+            emoji_scale_factor=0.9,
+            emoji_position_offset=(0, 8),
+        )
+
+    # nickname
+    nickname_xy = (rank_header_xy_end[0] + 12, rank_header_xy[1] + 4)
     
+    with Pilmoji(quote_image) as pilmoji:
+        pilmoji.text(
+            nickname_xy,
+            quote_message.nick_name,
+            fill=(140, 140, 140),
+            font=await _font("MiSans-Medium", 28),
+            emoji_scale_factor=0.9,
+            emoji_position_offset=(0, 8),
+        )
+
+    # message box
+    message_box_xy = (160, 94)
+    message_box_xy_end = (
+        160 + content_image.width + 25 + 25,
+        94 + content_image.height + 24 + 24,
+    )
+
+    ImageDraw.Draw(quote_image).rounded_rectangle(
+        [message_box_xy, message_box_xy_end], radius=25, fill=(37, 38, 40)
+    )
+
+    quote_image.paste(content_image, (185, 118), content_image)
+
+    return quote_image
+
+async def rend_quote_messages(messages: List[QuoteMessage], bot: Bot):
+    message_images = []
+    for message in messages:
+        message_image = await rend_quote_message(message, bot)
+        message_images.append(message_image)
+        
     _y = 0
-    for image in images:
-        f_image.paste(image, (0, _y), image)
-        _y += image.height - 28
+    total_height = sum(image.height for image in message_images)
+    result_image = Image.new(
+        "RGBA", (940, total_height), (16, 17, 18, 100)
+    )
     
-    return f_image
+    for message_image in message_images:
+        result_image.paste(message_image, (0, _y))
+        _y += message_image.height
+    
+    return result_image

@@ -1,6 +1,6 @@
 botid: 1234567890
 botnickname: "樱子"
-version: 1.3.0
+version: 1.4.0
 
 output_group: 1234567890
 command_output: true
