@@ -204,7 +204,7 @@ async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Ima
         for line in lines:
             with Pilmoji(Image.new("RGB", (1, 1))) as pilmoji:
                 image_width = max(image_width, pilmoji.getsize(
-                    line[:-1], font=font, emoji_scale_factor=0.9
+                    line, font=font, emoji_scale_factor=0.9
                 )[0])
 
         # rend the lines
@@ -317,7 +317,7 @@ async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Ima
             rank_text, font=await _font("MiSans-Semibold", 23), emoji_scale_factor=0.9
         )[0]
     
-    rank_header_xy_end = (160 + rank_text_width + 24, 22 + 23 + 24)
+    rank_header_xy_end = (160 + rank_text_width + 24, 22 + 44)
 
     ImageDraw.Draw(quote_image).rounded_rectangle(
         [rank_header_xy, rank_header_xy_end],
