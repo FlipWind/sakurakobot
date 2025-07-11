@@ -1,5 +1,6 @@
 from ..utils import *
 
+
 class QuoteMessage:
     class RankType(Enum):
         # Name, Background Color, Text Color
@@ -58,9 +59,9 @@ async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Ima
         return ImageFont.truetype(f"{ASSETS_PATH}/fonts/{name}.ttf", size)
 
     # Rend the message
-    async def rend_image(urls: List[str]) -> Image.Image:
+    async def rend_image(urls: List[str], sub_type: int = 0) -> Image.Image:
         """Rend the image from online resource.
-        The default width is the width of message.
+        The max width is the width of message.
         Under this ratio, it is defined as 690px.
         Args:
             url (List[str]): a list of URLs.
@@ -85,9 +86,20 @@ async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Ima
                         image = Image.open(image_data)
 
                         new_height = int(image.height * image_width / image.width)
-                        image = image.resize(
-                            (image_width, new_height), Image.Resampling.LANCZOS
-                        )
+
+                        if image.width > image_width:
+                            # resize the image to fit the width
+                            image = image.resize(
+                                (image_width, new_height), Image.Resampling.LANCZOS
+                            )
+                        
+                        if sub_type == 1:
+                            max_size = 310
+                            if image.width > max_size or image.height > max_size:
+                                scale_factor = min(max_size / image.width, max_size / image.height)
+                                new_width = int(image.width * scale_factor)
+                                new_height = int(image.height * scale_factor)
+                                image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
                         return image
                 except Exception:
@@ -116,12 +128,12 @@ async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Ima
         #     font = _font("MiSans-Medium", font_size)
         #     text_image = pilmoji.text(text, font=font, fill=(255, 255, 255), width=image_width)
 
-        if text.endswith('\n'):
+        if text.endswith("\n"):
             text = text[:-1]
         sentences = text.split("\n")
         lines = []
         current_line = ""
-        
+
         # handle text into lines
         for sentence in sentences:
             if sentence.endswith(" "):
@@ -199,20 +211,21 @@ async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Ima
                 current_line = ""
         if current_line != "":
             lines.append(current_line)
-        
+
         image_width = 0
         for line in lines:
             with Pilmoji(Image.new("RGB", (1, 1))) as pilmoji:
-                image_width = max(image_width, pilmoji.getsize(
-                    line, font=font, emoji_scale_factor=0.9
-                )[0])
+                image_width = max(
+                    image_width,
+                    pilmoji.getsize(line, font=font, emoji_scale_factor=0.9)[0],
+                )
 
         # rend the lines
         text_image_height = len(lines) * line_height
         text_image = Image.new(
             "RGBA", (image_width, text_image_height), (255, 255, 255, 0)
         )
-        
+
         for i, line in enumerate(lines):
             with Pilmoji(text_image) as pilmoji:
                 pilmoji.text(
@@ -238,15 +251,15 @@ async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Ima
                 if text_lists != "":
                     message_images.append(("text", await rend_text_message(text_lists)))
                     text_lists = ""
-                image_message = await rend_image([message.data["url"]])
-                
+                image_message = await rend_image([message.data["url"]], int(message.data["sub_type"]))
+
                 mask = Image.new("L", image_message.size, 0)
                 ImageDraw.Draw(mask).rounded_rectangle(
                     [(0, 0), image_message.size], radius=12, fill=255
                 )
                 image_message.putalpha(mask)
                 message_images.append(("image", image_message))
-                
+
             if message.type == "text":
                 text_lists += message.data["text"]
             if message.type == "at":
@@ -254,8 +267,8 @@ async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Ima
                     group_id=quote_message.group_id,
                     user_id=message.data["qq"],
                 )
-                
-                text_lists += f' @{profile["card"] if profile["card"] else profile["nickname"]}' # front with a space
+
+                text_lists += f' @{profile["card"] if profile["card"] else profile["nickname"]}'  # front with a space
 
         if text_lists != "":
             message_images.append(("text", await rend_text_message(text_lists)))
@@ -263,11 +276,15 @@ async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Ima
         for message_image in message_images:
             image_height += message_image[1].height
         image_height += (len(message_images) - 1) * 8
-        
-        content_image_width = 690
-        content_image_width = max(message_image[1].width for message_image in message_images)
 
-        content_image = Image.new("RGBA", (content_image_width, image_height), (255, 255, 255, 0))
+        content_image_width = 690
+        content_image_width = max(
+            message_image[1].width for message_image in message_images
+        )
+
+        content_image = Image.new(
+            "RGBA", (content_image_width, image_height), (255, 255, 255, 0)
+        )
 
         _y = 0
         for message_image in message_images:
@@ -310,14 +327,14 @@ async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Ima
     #     font=await _font("MiSans-Semibold", 23),
     #     color=quote_message.rank_type.value[2],
     # )
-    
+
     rank_text_width = 0
     with Pilmoji(Image.new("RGB", (1, 1))) as pilmoji:
         rank_text_width = pilmoji.getsize(
             rank_text, font=await _font("MiSans-Semibold", 23), emoji_scale_factor=0.9
         )[0]
-    
-    rank_header_xy_end = (160 + rank_text_width + 24, 22 + 44)
+
+    rank_header_xy_end = (160 + rank_text_width + 24, 22 + 46)
 
     ImageDraw.Draw(quote_image).rounded_rectangle(
         [rank_header_xy, rank_header_xy_end],
@@ -337,7 +354,7 @@ async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Ima
 
     # nickname
     nickname_xy = (rank_header_xy_end[0] + 12, rank_header_xy[1] + 4)
-    
+
     with Pilmoji(quote_image) as pilmoji:
         pilmoji.text(
             nickname_xy,
@@ -359,24 +376,33 @@ async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Ima
         [message_box_xy, message_box_xy_end], radius=25, fill=(37, 38, 40)
     )
 
-    quote_image.paste(content_image, (185, 118), content_image)
+    if (
+        len(quote_message.get_message_seg()) == 1
+        and quote_message.get_message_seg()[0].type == "image"
+    ):
+        content_image = content_image.resize(
+            (content_image.width + 25 + 25, content_image.height + 24 + 24),
+            resample=Image.Resampling.LANCZOS,
+        )
+        quote_image.paste(content_image, (160, 94), content_image)
+    else:
+        quote_image.paste(content_image, (185, 118), content_image)
 
     return quote_image
+
 
 async def rend_quote_messages(messages: List[QuoteMessage], bot: Bot):
     message_images = []
     for message in messages:
         message_image = await rend_quote_message(message, bot)
         message_images.append(message_image)
-        
+
     _y = 0
     total_height = sum(image.height for image in message_images)
-    result_image = Image.new(
-        "RGBA", (940, total_height), (16, 17, 18, 100)
-    )
-    
+    result_image = Image.new("RGBA", (940, total_height), (16, 17, 18, 100))
+
     for message_image in message_images:
         result_image.paste(message_image, (0, _y))
         _y += message_image.height
-    
+
     return result_image
