@@ -25,7 +25,7 @@ async def _(
     group_key = f"group_{event.group_id}"
     if group_key not in sakurako_state:
         sakurako_state[group_key] = {}
-    
+
     if sakurako_state[group_key].get("whathappened") == "processing":
         await whathappened.finish(
             "盯——\n本喵发现本群已经有了一个总结进程，请等待该请求完成后再进行下一次请求喵。"
@@ -34,15 +34,53 @@ async def _(
     sakurako_state[group_key]["whathappened"] = "processing"
 
     p = await bot.call_api(
-            "get_group_msg_history", group_id=event.group_id, count=count.result
-        )
+        "get_group_msg_history", group_id=event.group_id, count=count.result
+    )
 
     await whathappened.send(
-            f"知道你超急的喵。咱喵已经帮你抓到了最近 {count.result} 条消息喽，主人就乖乖在这里等本喵一下下啦，不要跑丢呜～"
-        )
+        f"知道你超急的喵。咱喵已经帮你抓到了最近 {count.result} 条消息喽，主人就乖乖在这里等本喵一下下啦，不要跑丢呜～"
+    )
 
-    content = await chatapi.summarize_chat(p)
-    messages = [f"下面是最近 {count.result} 条的总结喵。", content, "使用 Qwen3-235b-a22b 总结。"]
-    
+    all_models = [
+        "qwen3-235b-a22b",
+        "qwen-plus-2025-04-28",
+        "qwen-turbo-2025-04-28",
+        "qwen3-30b-a3b",
+        "qwen3-32b",
+        "qwen-plus",
+        "qwen-turbo",
+    ]
+
+    for model in all_models:
+        current_model = model
+        try:
+            await whathappened.send(
+                f"正在使用 {current_model} 模型进行总结喵，请稍等……"
+            )
+            content = await chatapi.summarize_chat(p, model_name=model)
+            break
+        except RuntimeError:
+            await whathappened.send(
+                f"使用 {current_model} 模型总结失败，尝试使用下一个模型喵……请稍等。"
+            )
+            continue
+    else:
+        sakurako_state[group_key]["whathappened"] = "done"
+        content = """呜呜，所有模型都总结失败了惹……
+最常见的原因消息里可能含有不健康内容，你可以重新总结试试~
+获取到错误如下：
+
+```
+{e}
+```
+
+您可以重新使用「发生了啥」发起一个新的尝试以总结喵。"""
+
+    messages = [
+        f"下面是最近 {count.result} 条的总结喵。",
+        content,
+        f"使用 {current_model} 总结。",
+    ]
+
     await send_node_messages(event, messages)
     sakurako_state[group_key]["whathappened"] = "done"
