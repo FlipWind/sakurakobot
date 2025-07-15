@@ -373,20 +373,25 @@ async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Ima
         94 + content_image.height + 24 + 24,
     )
 
-    ImageDraw.Draw(quote_image).rounded_rectangle(
-        [message_box_xy, message_box_xy_end], radius=25, fill=(37, 38, 40)
-    )
 
     if (
         len(quote_message.get_message_seg()) == 1
         and quote_message.get_message_seg()[0].type == "image"
     ):
+        scale = min(
+            (content_image.width + 25 + 25) / content_image.width,
+            (content_image.height + 24 + 24) / content_image.height,
+        )
+        
         content_image = content_image.resize(
-            (content_image.width + 25 + 25, content_image.height + 24 + 24),
+            (round(content_image.width * scale), round(content_image.height * scale)),
             resample=Image.Resampling.LANCZOS,
         )
         quote_image.paste(content_image, (160, 94), content_image)
     else:
+        ImageDraw.Draw(quote_image).rounded_rectangle(
+            [message_box_xy, message_box_xy_end], radius=25, fill=(37, 38, 40)
+        )
         quote_image.paste(content_image, (185, 118), content_image)
 
     return quote_image
