@@ -139,7 +139,7 @@ async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Ima
             if sentence.endswith(" "):
                 sentence = sentence[:-1]
             words = sentence.split(" ")
-            for word in words:
+            for i, word in enumerate(words):
                 pilmoji = Pilmoji(Image.new("RGB", (1, 1)))
                 if current_line == "":
                     # the line is empty, so rend char by char
@@ -162,7 +162,8 @@ async def rend_quote_message(quote_message: QuoteMessage, bot: Bot) -> Image.Ima
                         lines.append(current_line)
                         current_line = ""
                     else:
-                        current_line += " "
+                        if i != len(words) - 1:
+                            current_line += " "
                 else:
                     # the line not empty, try to add the word
                     line_width = pilmoji.getsize(
