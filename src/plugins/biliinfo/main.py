@@ -22,6 +22,34 @@ async def _(bot: Bot, event: GroupMessageEvent):
                     jumpUrl = tdata["meta"]["detail_1"]["qqdocurl"]
                 except:
                     pass
+    
+    text_content = message.extract_plain_text()
+
+    bvid_match = re.search(r'BV1[A-Za-z0-9]{9}', text_content)
+    if bvid_match:
+        bvid = bvid_match.group()
+        logger.success(f"Founded {bvid}")
+        
+        video_info = await render.get_video_info(bvid)
+        
+        help_im = await render.rend_image(video_info)
+        image_data = io.BytesIO()
+        help_im.save(image_data, format="PNG")
+        image_data_bytes = image_data.getvalue()
+
+        encoded_image = base64.b64encode(image_data_bytes).decode("utf-8")
+        
+        message_reply = Message(
+            [
+                MessageSegment.text("👀 成功获取视频信息：\n"),
+                MessageSegment.text(f"✨ 标题：{video_info.title}\n"),
+                MessageSegment.text(f"🤔 UP主：{video_info.owner.name}\n"),
+                MessageSegment.text(f"🔗 链接：https://www.bilibili.com/video/{bvid}\n"),
+                MessageSegment.image(f"base64://{encoded_image}"),
+            ]
+        )
+        
+        await biliinfo.finish(message_reply)
 
     if jumpUrl and jumpUrl.startswith("https://b23.tv/"):
         logger.success(f"yes = {jumpUrl}")

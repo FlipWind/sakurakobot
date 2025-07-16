@@ -187,7 +187,17 @@ async def rend_image(video_info: VideoInfo) -> Image.Image:
         response = await client.get(video_info.cover_url)
         if response.status_code == 200:
             cover_image = Image.open(BytesIO(response.content))
-            cover_image = cover_image.resize((1123, 642), Image.Resampling.LANCZOS)
+            ori_width, ori_height = cover_image.size
+            tar_width, tar_height = 1123, 642
+            
+            scale_x = tar_width / ori_width
+            scale_y = tar_height / ori_height
+            scale = max(scale_x, scale_y)
+            
+            new_width = int(ori_width * scale)
+            new_height = int(ori_height * scale)
+            
+            cover_image = cover_image.resize((new_width, new_height), Image.Resampling.LANCZOS)
             
             width, height = cover_image.size
             left = (width - 1123) // 2
