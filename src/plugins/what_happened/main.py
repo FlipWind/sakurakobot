@@ -51,17 +51,14 @@ async def _(
         "qwen-turbo",
     ]
 
-    for model in all_models:
+    for i, model in enumerate(all_models):
         current_model = model
         try:
-            await whathappened.send(
-                f"正在使用 {current_model} 模型进行总结喵，请稍等……"
-            )
             content = await chatapi.summarize_chat(p, model_name=model)
             break
         except RuntimeError:
             await whathappened.send(
-                f"使用 {current_model} 模型总结失败，尝试使用下一个模型喵……请稍等。"
+                f"使用 {model} 模型总结失败，尝试调用 {all_models[i+1]} 模型喵……请稍等。"
             )
             continue
     else:
