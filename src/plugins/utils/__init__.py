@@ -54,6 +54,7 @@ def get_config():
 VERSION = get_config().get("version", 0)
 
 BANNED_GROUPS = get_config().get("banned_groups", [])
+BANNED_PEOPLE = get_config().get("banned_people", [])
 SUPPER_USERS = get_config().get("super_users", [])
 BOTID = get_config().get("botid", 0)
 BOTNICKNAME = get_config().get("botnickname", "Bot")
