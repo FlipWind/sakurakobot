@@ -1,7 +1,7 @@
 from ..utils import *
 from . import render as render
 
-biliinfo = on_message()
+biliinfo = on_message(block=False)
 
 @biliinfo.handle()
 async def _(bot: Bot, event: GroupMessageEvent):
