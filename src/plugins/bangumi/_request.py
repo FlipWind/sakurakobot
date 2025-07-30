@@ -52,7 +52,7 @@ async def get_bangumi(keys: str, nums: int):
         else:
             print(f"请求失败，状态码: {response.status_code}")
     except Exception as e:
-        logger.error("function get_bangumi() got an Unknown Expection", e)
+        logger.error(f"function get_bangumi() got an Unknown Expection: {e}")
         pass
         # TODO: email notice & qq notice
     return bangumi_items
