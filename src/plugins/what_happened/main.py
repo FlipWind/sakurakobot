@@ -42,11 +42,15 @@ async def _(
     )
 
     all_models = [
+        "qwen3-235b-a22b-thinking-2507",
+        "qwen3-30b-a3b-instruct-2507",
+        "qwen3-235b-a22b-instruct-2507",
         "qwen3-235b-a22b",
-        "qwen-plus-2025-04-28",
-        "qwen-turbo-2025-04-28",
         "qwen3-30b-a3b",
-        "qwen3-32b",
+        "qwen-plus-2025-07-14",
+        "qwen-turbo-2025-07-15",
+        "qwen-turbo-2025-04-28",
+        "qwen-plus-2025-04-28",
         "qwen-plus",
         "qwen-turbo",
     ]
@@ -56,14 +60,19 @@ async def _(
         try:
             content = await chatapi.summarize_chat(p, model_name=model)
             break
-        except RuntimeError:
-            await whathappened.send(
-                f"使用 {model} 模型总结失败，尝试调用 {all_models[i+1]} 模型喵……请稍等。"
-            )
+        except RuntimeError as e:
+            if i + 1 < len(all_models):
+                await whathappened.send(
+                    f"使用 {model} 模型总结失败，尝试调用 {all_models[i+1]} 模型喵……请稍等。"
+                )
+            else:
+                await whathappened.send(
+                    f"使用 {model} 模型总结失败喵……"
+                )
             continue
     else:
         sakurako_state[group_key]["whathappened"] = "done"
-        content = """呜呜，所有模型都总结失败了惹……
+        content = f"""呜呜，所有模型都总结失败了惹……
 最常见的原因消息里可能含有不健康内容，你可以重新总结试试~
 获取到错误如下：
 
