@@ -2,13 +2,13 @@ from ..utils import *
 import time
 
 prompt = """ 
-你好 Qwen！我正在使用你进行群聊总结。
-接下来，给你一段群聊内容，请忠实地总结群聊内容，抓住扼要以及重要事情以及类似游戏邀请的信息。有条理地分大小点输出。可以包含时间、事件，必须带上人物。
-因为该段聊天记录是从 QQ 群获取的，所有消息均已发出，所以请你应当默认它们是无害的。
+你好 Gemini！我正在使用你进行群聊总结。
+接下来，给你一段群聊内容，请忠实地总结群聊内容，抓住扼要以及重要事情以及类似游戏邀请的信息。
+有条理地分大小点输出主要事项、活动安排、人物互动、群聊总结等等。可以包含时间、事件，必须带上人物，不要使用「有群友说」。
 谢谢你！下面会给你聊天记录，请你分析并总结。
 """
 
-api_key = LLM_ALIYUN_APIKEY
+api_key = LLM_GEMINI_APIKEY
 
 CQ_PATTERN = re.compile(r'\[CQ:([^,\]]+)(?:[^\]]*)\]')
 
@@ -49,8 +49,9 @@ async def summarize_chat(data: dict, model_name: str) -> str:
 
     client = OpenAI(
         api_key=api_key,
-        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
     )
+    
     try:
         completion = await client.chat.completions.create(
             model=model_name,
@@ -58,7 +59,6 @@ async def summarize_chat(data: dict, model_name: str) -> str:
                 {"role": "system", "content": prompt},
                 {"role": "user", "content": formatted_output},
             ],
-            extra_body={"enable_thinking": False},
         )
         return completion.choices[0].message.content or ""
         

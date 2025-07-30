@@ -42,16 +42,9 @@ async def _(
     )
 
     all_models = [
-        "qwen3-235b-a22b-instruct-2507",
-        "qwen3-30b-a3b-instruct-2507",
-        "qwen3-235b-a22b",
-        "qwen3-30b-a3b",
-        "qwen-plus-2025-07-14",
-        "qwen-turbo-2025-07-15",
-        "qwen-turbo-2025-04-28",
-        "qwen-plus-2025-04-28",
-        "qwen-plus",
-        "qwen-turbo",
+        "gemini-2.5-pro",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite"
     ]
 
     modelerror = None

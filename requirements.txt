@@ -10,6 +10,7 @@ arclet-alconna==1.8.38
 arclet-alconna-tools==0.7.10
 attrs==25.3.0
 beautifulsoup4==4.13.4
+cachetools==5.5.2
 certifi==2025.6.15
 charset-normalizer==3.4.2
 click==8.2.1
@@ -22,6 +23,8 @@ fastapi==0.115.14
 filetype==1.2.0
 frozenlist==1.7.0
 fuzzywuzzy==0.18.0
+google-auth==2.40.3
+google-genai==1.27.0
 greenlet==3.2.3
 h11==0.16.0
 h2==4.2.0
@@ -57,6 +60,7 @@ pilmoji==2.0.4
 propcache==0.3.2
 pyaes==1.6.1
 pyasn1==0.6.1
+pyasn1_modules==0.4.2
 pydantic==2.11.7
 pydantic_core==2.33.2
 pygtrie==2.5.0
@@ -76,6 +80,7 @@ SQLAlchemy==2.0.41
 starlette==0.46.2
 tarina==0.6.8
 Telethon==1.40.0
+tenacity==8.5.0
 tqdm==4.67.1
 typing-inspection==0.4.1
 typing_extensions==4.14.0

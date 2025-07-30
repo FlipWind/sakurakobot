@@ -63,6 +63,7 @@ COMMAND_OUTPUT = get_config().get("command_output", False)
 OUTPUT_GROUP = get_config().get("output_group", 0)
 
 LLM_ALIYUN_APIKEY = get_config().get("llm", {}).get("aliyun-apikey", "")
+LLM_GEMINI_APIKEY = get_config().get("llm", {}).get("gemini-apikey", "")
 driver = get_driver()
 
 PJSK_ZHDBLINK = get_config().get("pjsk_tool", {}).get("zh_db_link", "")
@@ -109,6 +110,16 @@ async def _():
     BOT = nonebot.get_bot()
     
     await BOT.send_group_msg(group_id=OUTPUT_GROUP, message="Sakurako Bot Started.")
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get("https://www.google.com/", timeout=5.0, follow_redirects=True)
+            if response.status_code == 200:
+                await BOT.send_group_msg(group_id=OUTPUT_GROUP, message="Google connected.")
+            else:
+                await BOT.send_group_msg(group_id=OUTPUT_GROUP, message="Google connection failed.")
+    except Exception as e:
+        await BOT.send_group_msg(group_id=OUTPUT_GROUP, message=f"Google connection failed: {e}")
 
 ### Functions
 
