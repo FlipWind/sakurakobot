@@ -86,6 +86,9 @@ TELEGRAM_ACC_PASSWORD = get_config().get("telegram", {}).get("account", {}).get(
 ### Assets
 ASSETS_PATH = pathlib.Path(__file__).parent.parent.parent.parent / "assets"
 
+### Temp
+TEMP_PATH = pathlib.Path(__file__).parent.parent.parent.parent / "temp"
+
 ### Struct
 
 class NodeMessage:

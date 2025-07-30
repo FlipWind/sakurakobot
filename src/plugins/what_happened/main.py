@@ -55,6 +55,7 @@ async def _(
         "qwen-turbo",
     ]
 
+    modelerror = None
     for i, model in enumerate(all_models):
         current_model = model
         try:
@@ -66,9 +67,9 @@ async def _(
                     f"使用 {model} 模型总结失败，尝试调用 {all_models[i+1]} 模型喵……请稍等。"
                 )
             else:
-                await whathappened.send(
-                    f"使用 {model} 模型总结失败喵……"
-                )
+                await whathappened.send(f"使用 {model} 模型总结失败喵……")
+
+            modelerror = e
             continue
     else:
         sakurako_state[group_key]["whathappened"] = "done"
@@ -77,7 +78,7 @@ async def _(
 获取到错误如下：
 
 ```
-{e}
+{modelerror}
 ```
 
 您可以重新使用「发生了啥」发起一个新的尝试以总结喵。"""
@@ -90,3 +91,34 @@ async def _(
 
     await send_node_messages(event, messages)
     sakurako_state[group_key]["whathappened"] = "done"
+
+
+whathappened_debug = on_alconna(
+    Alconna("#aidebug", Args["count?", int, 500], meta=CommandMeta(compact=True))
+)
+
+@whathappened_debug.handle()
+async def _(
+    event: GroupMessageEvent, bot: Bot, count: Match[int] = AlconnaMatch("count")
+):
+    if COMMAND_OUTPUT:
+        await whathappened_debug.send(f"Handle [#aidebug] with count [{count.result}]")
+
+    p = await bot.call_api(
+        "get_group_msg_history", group_id=event.group_id, count=count.result
+    )
+    
+    p = await chatapi.format_messages(p)
+
+    with open(f"{TEMP_PATH}/temp.txt", "w", encoding="utf-8") as f:
+        f.write(p)
+
+    await bot.send_group_msg(
+        group_id=event.group_id,
+        message=Message(
+            MessageSegment(
+            type = "file", 
+            data= {"file": f"file://{TEMP_PATH}/temp.txt", "name": "temp.txt"}
+        ),
+        )
+    )
