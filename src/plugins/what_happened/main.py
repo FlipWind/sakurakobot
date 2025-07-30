@@ -63,7 +63,7 @@ async def _(
         except RuntimeError as e:
             if i + 1 < len(all_models):
                 await whathappened.send(
-                    f"使用 {model} 模型总结失败，尝试调用 {all_models[i+1]} 模型喵……请稍等。"
+                    f"使用 {model} 模型总结失败，尝试调用下一个模型喵……请稍等。"
                 )
             else:
                 await whathappened.send(f"使用 {model} 模型总结失败喵……")
