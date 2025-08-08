@@ -28,13 +28,19 @@ import requests
 
 require("nonebot_plugin_alconna")
 from arclet.alconna import Alconna, Alconna, Args, Option, MultiVar
-from nonebot_plugin_alconna import At, on_alconna, AlconnaMatch, Match, CommandMeta, At, Query
+from nonebot_plugin_alconna import At, on_alconna, AlconnaMatch, Match, CommandMeta, At, Query, Image
 
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment, Event, MessageEvent, GroupBanNoticeEvent, GroupRequestEvent
 from nonebot.adapters.onebot.v11.exception import ActionFailed
 
 require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
+
+# data
+require("nonebot_plugin_localstore")
+import nonebot_plugin_localstore as store
+
+DATA_PATH = store.get_plugin_data_dir()
 
 CONFIG_PATH = "config.yaml"
 sakurako_state: Dict[str, Any] = {}
