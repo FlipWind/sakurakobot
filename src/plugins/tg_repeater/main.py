@@ -66,6 +66,9 @@ class Repeater:
                 if any(word in checker for word in ["中出", "r18", "nsfw", "18", "后入", "足交"]):
                     logger.error(f"消息疑似包含 NSFW 内容，跳过转发 (chat_id: {chat_id})")
                     return
+                if any(word in checker for word in ["月付", "季付", "优惠", "节点", "价格", "欢迎光临", "限时", "永久", "套餐", "机场", "低至"]):
+                    logger.error(f"消息疑似包含 广告 内容，跳过转发 (chat_id: {chat_id})")
+                    return
             if event.message.media:
                 file_path = f"{TEMP_PATH}/{chat_id}_{event.message.id}.png"
                 await self.client.download_media(event.message.media, file=file_path)
