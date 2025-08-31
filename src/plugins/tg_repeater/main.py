@@ -63,7 +63,7 @@ class Repeater:
                 message.append(MessageSegment.text(event.message.message))
                 checker = event.message.message.lower()
                 
-                if any(word in checker for word in ["中出", "r18", "nsfw", "18", "后入", "足交"]):
+                if any(word in checker for word in ["中出", "r18", "nsfw", "18", "后入", "足交", "NSFW", "#NSFW", "R-18", "r-18", "R18"]):
                     logger.error(f"消息疑似包含 NSFW 内容，跳过转发 (chat_id: {chat_id})")
                     return
                 if any(word in checker for word in ["月付", "季付", "优惠", "节点", "价格", "欢迎光临", "限时", "永久", "套餐", "机场", "低至"]):
