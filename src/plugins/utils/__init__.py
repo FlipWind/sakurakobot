@@ -51,7 +51,7 @@ def get_config():
 
     if _config == {}:
         logger.success(f"正在加载配置文件 {CONFIG_PATH}")
-        with open(CONFIG_PATH, "r") as f:
+        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             _config = yaml.load(f, Loader=yaml.FullLoader)
         logger.success(f"已加载配置文件。")
 

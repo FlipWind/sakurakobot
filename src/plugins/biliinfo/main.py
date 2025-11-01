@@ -23,8 +23,13 @@ async def get_bvid(message: Message):
         logger.success(f"yes = {jumpUrl}")
 
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-            "Referer": "https://www.bilibili.com/",
+            "accept": "*/*",
+            "accept-language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,zh-TW;q=0.5,ja;q=0.4",
+            "content-type": "application/x-www-form-urlencoded",
+            "cookie": "",
+            "referer": "https://www.bilibili.com/",
+            "priority": "u=1, i",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0",
         }
 
         # https://b23.tv/mkHk2iI
@@ -32,6 +37,7 @@ async def get_bvid(message: Message):
             response = await client.get(jumpUrl, follow_redirects=True, headers=headers)
             # print(response)
             if response.status_code != 200:
+                logger.error(response.text)
                 await biliinfo.finish("获取数据失败，请稍后再试。")
         # data = response.json()
         link = response.url
