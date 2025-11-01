@@ -6,4 +6,4 @@ __plugin_meta__ = PluginMetadata(
     usage="",
 )
 
-from . import main as main
+# from . import main as main
