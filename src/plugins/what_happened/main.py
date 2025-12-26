@@ -42,8 +42,8 @@ async def _(
     )
 
     all_models = [
-        "gemini-3-pro",
-        "gemini-3-flash",
+        "gemini-3-pro-preview",
+        "gemini-3-flash-preview",
         "gemini-2.5-flash"
     ]
 
