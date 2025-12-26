@@ -18,3 +18,20 @@ Version {VERSION}
 
 Developed by FlipWind""")
     
+check = on_alconna(
+    Alconna("#check", Args["domain?", str], meta=CommandMeta(compact=True))
+)
+@check.handle()
+async def _(
+    domain: Match[str] = AlconnaMatch("domain")
+):
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"https://{domain.result}", timeout=5.0, follow_redirects=True)
+            if response.status_code == 200:
+                await check.finish(group_id=OUTPUT_GROUP, message="Connection successfully with 200 OK.")
+            else:
+                await check.finish(group_id=OUTPUT_GROUP, message="Connection failed.")
+    except Exception as e:
+        await check.finish(group_id=OUTPUT_GROUP, message=f"Connection failed: {e}")
+    
