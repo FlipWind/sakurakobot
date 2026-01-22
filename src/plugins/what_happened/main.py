@@ -1,5 +1,6 @@
 from ..utils import *
 from . import chatapi as chatapi
+from . import markdown as markdown
 
 whathappened = on_alconna(
     Alconna("发生了啥", Args["count?", int, 500], meta=CommandMeta(compact=True)),
@@ -79,6 +80,8 @@ async def _(
         content,
         f"使用 {current_model} 总结。",
     ]
+    
+    await whathappened.send(Message(MessageSegment.image(await markdown.md_to_image(content, width=800))))
 
     await send_node_messages(event, messages)
     sakurako_state[group_key]["whathappened"] = "done"

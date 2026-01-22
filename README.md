@@ -9,3 +9,9 @@
 ## 文档
 
 详见 [Nonebot Docs](https://nonebot.dev/).
+
+## 可能额外安装
+```
+pip install markdown2 playwright pygments
+playwright install chromium
+```

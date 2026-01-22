@@ -39,6 +39,7 @@ jiter==0.10.0
 Levenshtein==0.27.1
 loguru==0.7.3
 Mako==1.3.10
+markdown2==2.5.4
 MarkupSafe==3.0.2
 meme_generator==0.2.2
 msgpack==1.1.1
@@ -57,12 +58,15 @@ nonestorage==0.1.0
 openai==1.93.0
 pillow==11.3.0
 pilmoji==2.0.4
+playwright==1.57.0
 propcache==0.3.2
 pyaes==1.6.1
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
 pydantic==2.11.7
 pydantic_core==2.33.2
+pyee==13.0.0
+Pygments==2.19.2
 pygtrie==2.5.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
