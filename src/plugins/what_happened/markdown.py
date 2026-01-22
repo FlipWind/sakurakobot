@@ -35,7 +35,7 @@ async def md_to_image(md_text, width=800):
                 justify-content: center; 
                 background: {config['background']}; 
                 min-height: 100vh;
-                font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+                font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
             }}
 
             #container {{ 
