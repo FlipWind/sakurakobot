@@ -49,7 +49,8 @@ async def summarize_chat(data: dict, model_name: str) -> str:
 
     client = OpenAI(
         api_key=api_key,
-        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+        base_url=f"https://{LLM_GEMINI_BASEURL}/v1beta/openai/",
+        default_headers={'User-Agent': 'Sakurako/1.0 (Windows 10; Win64; x64) Napcat/1.6.7 gemini'},
     )
     
     try:
