@@ -25,9 +25,12 @@ class BangumiItem:
         self.magnet = magnet
 
 
-async def get_bangumi(keys: str, nums: int):
+async def get_bangumi(keys: list[str], nums: int):
     bangumi_items = []
-    _url = f"https://api.animes.garden/resources?pageSize={nums}&magnetWithoutTracker=true&search=[\"{keys}\"]"
+    key_list = ""
+    for key in keys:
+        key_list += "search=" + key + "&"
+    _url = f"https://api.animes.garden/resources?pageSize={nums}&{key_list}"
     logger.success(f"Result Url: {_url}")
 
     try:
