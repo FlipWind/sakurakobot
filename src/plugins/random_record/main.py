@@ -6,7 +6,7 @@ random_remark = on_alconna(
     Alconna(
         "#随机语录",
     ),
-    aliases=("#典", "#语录", "#爆典")
+    aliases=("#典", "#语录", "#爆典", "#随机怪话", "#怪话")
 )
 
 @random_remark.handle()
@@ -32,7 +32,7 @@ collect_remark = on_alconna(
         Args["image?", Image],
         meta=CommandMeta(compact=True)
     ),
-    aliases=("#爆",)
+    aliases=("#爆","#加入怪话", "#收集")
 )
 
 @collect_remark.handle()
