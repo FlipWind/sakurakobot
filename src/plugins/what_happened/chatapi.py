@@ -66,8 +66,14 @@ async def format_messages(data: dict) -> str:
         nickname = sender.get("nickname", "Unknown")
         user_id = sender.get("user_id", "Unknown")
         raw_message = message.get("raw_message", "")
+        
+        if len(raw_message) > 600:
+            processed_message = f"[此为一段长度为 {len(raw_message)} 的内容，已自动忽略]"
+        else:
+            processed_message = cq_type(raw_message)
+
         result.append(
-            f"USER {nickname} ON {formatted_time} SEND: {cq_type(raw_message)},"
+            f"USER {nickname} ON {formatted_time} SEND: {processed_message},"
         )
 
     formatted_output = "\n".join(result)
