@@ -34,8 +34,8 @@ async def _(
     for item in res.items:
         _item = Message(
             f"ID #{item.id}\n"
-            f"{item.name}{'(' + item.name_cn + ')' if item.name_cn else None}\n"
-            + MessageSegment.image(item.image_url)
+            f"{item.name}{'(' + item.name_cn + ')' if item.name_cn else ""}\n"
+            + MessageSegment.image(item.image_url if item.image_url else "https://lain.bgm.tv/img/no_icon_subject.png")
             + "\n"
             f"⏰ 开播: {item.air_date}\n"
             f"⭐ 评分: {item.score}\n📈 排名: {item.rank}\n"
@@ -93,8 +93,8 @@ async def bangumi_search_internal(
     for item in res[:6]:
         _item = Message(
             f"ID #{item.id}\n"
-            f"{item.name}{'(' + item.name_cn + ')' if item.name_cn else None}\n"
-            + MessageSegment.image(item.image_url)
+            f"{item.name}{'(' + item.name_cn + ')' if item.name_cn else ""}\n"
+            + MessageSegment.image(item.image_url if item.image_url else "https://lain.bgm.tv/img/no_icon_subject.png")
             + "\n"
             f"在 {item.date} 于 {item.platform} 首播，共 {item.eps} 集\n"
             f"⭐ 评分: {item.score}\n📈 排名: {item.rank}\n"
@@ -149,13 +149,13 @@ async def character_search_internal(
     ]
 
     for item in res[:6]:
-        _related_subjects = "\n".join(f"「{obj.staff}」担当于 ID#{obj.id} {obj.name}{'(' + obj.name_cn + ')' if obj.name_cn else None}" for obj in item.related_subjects[:5])
+        _related_subjects = "\n".join(f"「{obj.staff}」担当于 ID#{obj.id} {obj.name}{'(' + obj.name_cn + ')' if obj.name_cn else ""}" for obj in item.related_subjects[:5])
         _item = Message(
             f"ID #{item.id}\n"
-            f"{item.name}{'(' + item.gender + ')' if item.gender else None}\n"
-            + MessageSegment.image(item.image_url)
-            + f"\n> 简介: \n{item.summary}\n\n"
-            f"🔮 相关作品: \n{_related_subjects}\n"
+            f"{item.name}{'(' + item.gender + ')' if item.gender else ""}\n"
+            + MessageSegment.image(item.image_url if item.image_url else "https://lain.bgm.tv/img/no_icon_subject.png")
+            + MessageSegment.text(f"\n> 简介: \n{item.summary}\n\n" if item.summary else "\n\n")
+            + f"🔮 相关作品: \n{_related_subjects}\n"
             f"\n🔗 https://bgm.tv/character/{item.id}"
         )
         append_list.append(_item)
