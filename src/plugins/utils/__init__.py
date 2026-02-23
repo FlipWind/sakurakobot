@@ -91,6 +91,9 @@ TELEGRAM_PROXY_PORT = get_config().get("telegram", {}).get("proxy", {}).get("por
 TELEGRAM_ACC_PHONE = get_config().get("telegram", {}).get("account", {}).get("phone", "")
 TELEGRAM_ACC_PASSWORD = get_config().get("telegram", {}).get("account", {}).get("password", "")
 
+BGM_TV_ID = get_config().get("bgm.tv", {}).get("id", "")
+BGM_TV_SECRET = get_config().get("bgm.tv", {}).get("secret", "")
+
 ### Assets
 ASSETS_PATH = pathlib.Path(__file__).parent.parent.parent.parent / "assets"
 
@@ -174,6 +177,33 @@ async def send_node_messages(event: MessageEvent, messages: List[Any]):
         await bot.send(event, "发送转发消息失败，推测是可能该消息内含有屏蔽词喵~\n改为直接发送喵。")
         
         await bot.send(event, Message("\n".join(messages)))
+
+async def send_node_messages_list(event: MessageEvent, messages: List[Message]):
+    """
+    Args:
+        event (MessageEvent): 事件对象
+        messages (List[Message]): 转发消息的列表
+    """
+    bot = BOT
+    
+    if not messages:
+        return
+    
+    _message = Message()
+    
+    for message in messages:
+        _message.append(
+            MessageSegment.node_custom(
+                content=message, nickname=BOTNICKNAME, user_id=BOTID
+            )
+        )
+    
+    try:
+        await bot.send(event, message=_message)
+    except ActionFailed as e:
+        logger.error(f"Error in sending message: {e}")
+        logger.error(messages)
+        await bot.send(event, "发送消息失败喵。")
 
 def get_user_is_admin(event: GroupMessageEvent):
     return event.sender.role != "member"
