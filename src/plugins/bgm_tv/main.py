@@ -117,7 +117,7 @@ character_search = on_alconna(
     aliases=("#查角色", "#角色", "搜角色"),
 )
 
-character_search_alt = on_regex(r"^(?P<keyword>.+)是谁$")
+character_search_alt = on_regex(r"^(?P<keyword>.+)是什么角色$")
 
 @character_search.handle()
 async def _(
