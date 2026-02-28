@@ -26,7 +26,7 @@ async def md_to_image(md_text, width=800):
                 startup: {{ pageReady: () => MathJax.startup.defaultPageReady().then(() => {{ window.mathjaxFinished = true; }}) }}
             }};
         </script>
-        <script src="https://unpkg.com/mathjax@4.1.0/tex-chtml.js" async></script>
+        <script src="https://unpkg.zhimg.com/mathjax@4.1.0/tex-chtml.js" async></script>
         <style>
             body {{ 
                 margin: 0;
@@ -71,7 +71,8 @@ async def md_to_image(md_text, width=800):
         browser = await p.chromium.launch()
         context = await browser.new_context(device_scale_factor=2)
         page = await context.new_page()
-        await page.set_content(full_html)
+        await page.set_content(full_html, wait_until="domcontentloaded")
+
 
         try:
             await page.wait_for_function("window.mathjaxFinished === true", timeout=10000)
