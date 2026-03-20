@@ -1,6 +1,7 @@
 from ..utils import *
 from . import chatapi as chatapi
 from . import markdown as markdown
+import asyncio
 
 whathappened = on_alconna(
     Alconna("发生了啥", Args["count?", int, 500], meta=CommandMeta(compact=True)),
@@ -46,14 +47,24 @@ async def _(
         "gemini-3-flash-preview",
         "gemini-2.5-flash"
     ]
-
+    
+    async def summarize_with_timeout(p, model_name, timeout=360):
+        try:
+            return await asyncio.wait_for(chatapi.summarize_chat(p, model_name=model_name), timeout)
+        except asyncio.TimeoutError:
+            raise RuntimeError("总结超时 6 分钟喵，请再次尝试~")
+        
     modelerror = None
     for i, model in enumerate(all_models):
         current_model = model
         try:
-            content = await chatapi.summarize_chat(p, model_name=model)
+            content = await summarize_with_timeout(p, model)
             break
         except RuntimeError as e:
+            await whathappened.send(f"使用 {model} 模型总结失败了喵……\n总结超时 6 分钟，请再次尝试~")
+            sakurako_state[group_key]["whathappened"] = "done"
+            return
+        except Exception as e:
             if i + 1 < len(all_models):
                 await whathappened.send(
                     f"使用 {model} 模型总结失败，尝试调用下一个模型喵……请稍等。"
@@ -63,6 +74,7 @@ async def _(
 
             modelerror = e
             continue
+        
     else:
         sakurako_state[group_key]["whathappened"] = "done"
         content = f"""呜呜，所有模型都总结失败了惹……
@@ -85,6 +97,7 @@ async def _(
 
     await send_node_messages(event, messages)
     sakurako_state[group_key]["whathappened"] = "done"
+    return
 
 
 whathappened_debug = on_alconna(
